@@ -1,131 +1,200 @@
-:root {
-    --primary: #6366f1;
-    --primary-hover: #4f46e5;
-    --bg-gradient: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
-    --glass: rgba(255, 255, 255, 0.05);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
-}
+/* 
+ * GRADE MANAGEMENT SYSTEM GLOBAL STYLES 
+ * Powered by Bootstrap 5 Utilities & Custom Academic Theme 
+ */
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
+:root {
+    --hust-red: #c8102e;
+    --hust-dark-red: #a00d25;
+    --bg-light: #f5f6f8;
+    --transition: all 0.3s ease;
 }
 
 body {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--bg-gradient);
-    color: var(--text-main);
-    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-light);
 }
 
-.login-card {
-    background: var(--glass);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
-    padding: 2.5rem;
-    border-radius: 1.5rem;
-    width: 100%;
-    max-width: 400px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    animation: fadeIn 0.6s ease-out;
+/* ==================================
+ * CUSTOM THEME UTILITIES
+ * ================================== */
+.text-hust { 
+    color: var(--hust-red) !important; 
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+.bg-hust { 
+    background-color: var(--hust-red) !important; 
 }
 
-h1 {
-    font-size: 1.875rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    text-align: center;
-    background: linear-gradient(to right, #818cf8, #c084fc);
+.btn-hust {
+    background-color: var(--hust-red) !important;
+    border-color: var(--hust-red) !important;
+    color: #ffffff !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 6px rgba(200, 16, 46, 0.2);
+    transition: all 0.3s ease;
+    opacity: 1 !important;
+}
+
+.btn-hust:hover, .btn-hust:active, .btn-hust:focus {
+    background-color: var(--hust-dark-red) !important;
+    border-color: var(--hust-dark-red) !important;
+    color: #ffffff !important;
+    box-shadow: 0 6px 12px rgba(200, 16, 46, 0.3);
+    transform: translateY(-2px);
+}
+
+.hust-text-gradient {
+    background: linear-gradient(to right, var(--hust-red), var(--hust-dark-red));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
-p.subtitle {
-    color: var(--text-muted);
-    text-align: center;
-    margin-bottom: 2rem;
-    font-size: 0.875rem;
+/* Custom form inputs focus state matching theme */
+.form-control:focus {
+    border-color: #f7a6b4;
+    box-shadow: 0 0 0 0.25rem rgba(200, 16, 46, 0.25);
 }
 
-.form-group {
-    margin-bottom: 1.5rem;
+/* Section Title global format */
+.section-title {
+    position: relative;
 }
-
-label {
+.section-title::after {
+    content: '';
     display: block;
-    margin-bottom: 0.5rem;
-    font-size: 0.875rem;
+    width: 60px;
+    height: 4px;
+    background: var(--hust-red);
+    margin: 15px auto 0;
+    border-radius: 2px;
+}
+
+/* ==================================
+ * 1. HERO HEADER SPECIFIC
+ * ================================== */
+.hero-section {
+    position: relative;
+    background: url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+}
+
+/* If header is NOT in the homepage context, we limit its size */
+.hero-section.hero-sm {
+    height: auto;
+    min-height: 80px;
+}
+.hero-section.hero-lg {
+    height: 600px;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.5) 100%);
+    z-index: 1;
+}
+
+.navbar-custom {
+    position: relative;
+    z-index: 10;
+    background: linear-gradient(90deg, rgba(200, 16, 46, 0.95) 0%, rgba(160, 13, 37, 0.9) 100%);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.nav-logo {
+    width: 50px;
+    height: 50px;
+    background-color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: var(--hust-red);
+    font-size: 1.2rem;
+}
+
+.nav-link-custom {
+    color: white !important;
+    font-size: 0.95rem;
     font-weight: 500;
-    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
 }
 
-input {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid var(--glass-border);
-    border-radius: 0.75rem;
+.nav-link-custom::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    transition: var(--transition);
+}
+.nav-link-custom:hover::after {
+    width: 80%;
+}
+
+.lang-select {
+    background: transparent;
     color: white;
-    font-size: 1rem;
-    transition: all 0.2s;
-}
-
-input:focus {
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 20px;
     outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
+.lang-select option { color: #333; }
 
-.error-message {
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    color: #fca5a5;
-    padding: 0.75rem;
-    border-radius: 0.75rem;
-    margin-bottom: 1.5rem;
-    font-size: 0.875rem;
-    text-align: center;
-}
-
-button {
-    width: 100%;
-    padding: 0.75rem;
-    background: var(--primary);
+.login-btn {
+    border: 2px solid white;
+    border-radius: 30px;
+    background: transparent;
     color: white;
-    border: none;
-    border-radius: 0.75rem;
-    font-size: 1rem;
     font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
+    transition: var(--transition);
+}
+.login-btn:hover {
+    background: white;
+    color: var(--hust-red);
 }
 
-button:hover {
-    background: var(--primary-hover);
-    transform: translateY(-1px);
+/* ==================================
+ * 2. TEACHER CARDS
+ * ================================== */
+.teacher-card { transition: all 0.3s ease; border: none; }
+.teacher-card:hover { transform: translateY(-5px); box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12) !important; }
+.teacher-card:hover .tc-btn { background-color: var(--hust-red) !important; color: white !important; }
+
+/* ==================================
+ * 3. STUDENT CARDS
+ * ================================== */
+.student-card { transition: all 0.3s ease; border: 1px solid #eaeaea; cursor: pointer; }
+.student-card:hover { box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08) !important; border-color: #fce4e4; transform: translateX(5px); }
+.sc-icon { width: 50px; height: 50px; border-radius: 50%; background-color: #fdf2f2; color: var(--hust-red); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; transition: all 0.3s ease; }
+.student-card:hover .sc-icon { background-color: var(--hust-red); color: white; }
+
+/* ==================================
+ * 4. MOBILE APP SECTION & FOOTER
+ * ================================== */
+.app-section {
+    background: #EAECEF url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><path d="M0 100 L 20 60 L 40 80 L 60 40 L 80 70 L 100 20 L 100 100 Z" fill="rgba(200,200,200,0.1)"/></svg>') bottom/contain no-repeat;
+    border-top: 1px solid #ddd;
 }
 
-button:active {
-    transform: translateY(0);
+.app-btn {
+    background: #222;
+    color: white;
+    transition: var(--transition);
+    text-decoration: none;
 }
 
-.footer {
-    margin-top: 2rem;
-    text-align: center;
-    font-size: 0.75rem;
-    color: var(--text-muted);
+.app-btn:hover {
+    background: #000;
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }

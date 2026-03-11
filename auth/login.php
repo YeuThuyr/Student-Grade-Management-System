@@ -25,51 +25,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header('Location: ../index.php');
                 exit();
             } else {
-                $error = "Invalid username or password.";
+                $error = "Tài khoản hoặc mật khẩu không chính xác.";
             }
         } else {
-            $error = "Invalid username or password.";
+            $error = "Tài khoản hoặc mật khẩu không chính xác.";
         }
         $stmt->close();
     } else {
-        $error = "Please fill in all fields.";
+        $error = "Vui lòng nhập đầy đủ thông tin.";
     }
 }
+
+// Cấu hình Base Path và Nạp Header chung
+define('BASE_PATH', '../');
+require_once '../includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Grade Management</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/style.css">
 
-</head>
-<body>
-    <div class="login-card">
-        <h1>Welcome Back</h1>
-        <p class="subtitle">Please enter your details to sign in</p>
+    <main class="container py-5 my-5 flex-grow-1 d-flex align-items-center justify-content-center">
+        <div class="row justify-content-center w-100">
+            <div class="col-12 col-md-8 col-lg-5">
+                <div class="card shadow-lg border-0 rounded-4" style="background: #ffffff;">
+                    <div class="card-body p-5">
+                        <div class="text-center mb-4">
+                            <h2 class="fw-bold hust-text-gradient mb-2">Đăng Nhập Hệ Thống</h2>
+                            <p class="text-muted fs-6">Vui lòng nhập thông tin để truy cập</p>
+                        </div>
 
-        <?php if (isset($error)): ?>
-            <div class="error-message"><?php echo $error; ?></div>
-        <?php endif; ?>
+                        <?php if (isset($error)): ?>
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <?php echo htmlspecialchars($error); ?>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        <?php endif; ?>
 
-        <form method="POST" action="">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                        <form method="POST" action="">
+                            <div class="mb-3">
+                                <label for="username" class="form-label fw-semibold text-secondary">Tên đăng nhập</label>
+                                <input type="text" class="form-control form-control-lg bg-light" id="username" name="username" placeholder="Nguyễn Văn A" required>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="password" class="form-label fw-semibold text-secondary">Mật khẩu</label>
+                                <input type="password" class="form-control form-control-lg bg-light" id="password" name="password" placeholder="••••••••" required>
+                            </div>
+                            
+                            <div class="d-grid mb-4">
+                                <button type="submit" class="btn btn-hust btn-lg fw-bold w-100">Đăng Nhập</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="••••••••" required>
-            </div>
-            <button type="submit">Sign In</button>
-        </form>
-
-        <div class="footer">
-            &copy; <?php echo date('Y'); ?> Grade Management System
         </div>
-    </div>
-</body>
-</html>
+    </main>
+
+<?php 
+// Nạp Footer chung
+require_once '../includes/footer.php'; 
+?>
