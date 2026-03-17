@@ -93,42 +93,19 @@ A sample database configuration file is provided as a template.
    $user = "your_user";              // Your MySQL username
    $password = "your_password";      // Your MySQL password
    $database = "grade_management";   // Your database name
-   
-   // Connect to MySQL server first without selecting a database
-   $conn = new mysqli($host, $user, $password);
-   
-   if ($conn->connect_error) {
-       die("Database connection failed: " . $conn->connect_error);
-   }
-   
-   // Check if database exists and select it
-   if (!$conn->select_db($database)) {
-       die("Error: Database '$database' does not exist. Please create it and run the SQL in 'sql/schema.sql'.");
-   }
    ?>
    ```
 
-### Step 3: Create and Initialize Your Database
+### Step 3: Access your database
 
-1. Create a new MySQL database:
-   ```sql
-   CREATE DATABASE grade_management;
-   ```
-
-2. Import the database schema:
-   ```bash
-   mysql -u your_user -p grade_management < sql/schema.sql
-   ```
+1. Access your database via URL: "http://grade-management/phpmyadmin"
 
 ### Step 4: Run the Application
 
 1. Navigate back to the project root directory
-2. Start your local web server (or use PHP's built-in server):
-   ```bash
-   php -S localhost:8000
-   ```
+2. Start Apache and MySQL in XAMPP Control Panel
 
-3. Open your browser and visit: `http://localhost:8000`
+3. Open your browser and visit: `http://localhost/grade-management`
 
 ### Important Notes for Collaborators
 
