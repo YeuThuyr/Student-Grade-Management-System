@@ -33,7 +33,7 @@ if (!defined('BASE_PATH')) {
 
 
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
 
     <!-- HERO HEADER SHARED -->
     <?php 
