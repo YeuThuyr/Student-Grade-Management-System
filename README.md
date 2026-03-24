@@ -35,7 +35,7 @@ The Student Grade Management System is a web application designed to streamline 
 
 - **Language**: PHP
 - **Database**: MySQL/MariaDB
-- **Frontend**: HTML, CSS, JavaScript
+- **Frontend**: HTML, CSS
 - **Architecture**: MVC-inspired modular structure
 
 ## Prerequisites
@@ -54,7 +54,7 @@ The Student Grade Management System is a web application designed to streamline 
    ```
 
 2. Set up database:
-   - Import the SQL schema from the `sql/` directory into your MySQL database
+   - Import the SQL schema from the `sql/` directory into your MySQL database by importing the file to the database.
    - Update database credentials in `config/` files
 
 3. Configure the application:
