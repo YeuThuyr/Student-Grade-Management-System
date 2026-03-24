@@ -11,7 +11,7 @@ function checkRole($allowedRoles = []) {
         session_start();
     }
 
-    if (!isset($_SESSION['user'])) {
+    if (!isset($_SESSION['user_id'])) {
         $isApi = strpos($_SERVER['REQUEST_URI'], '/api/') !== false || 
                  (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
                  

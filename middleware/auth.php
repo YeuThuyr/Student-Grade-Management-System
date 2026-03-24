@@ -10,7 +10,7 @@ function handleAuth() {
         session_start();
     }
 
-    if (!isset($_SESSION['user'])) {
+    if (!isset($_SESSION['user_id'])) {
 
         // Detect API request
         $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
