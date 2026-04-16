@@ -5,17 +5,18 @@ CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
+    student_code CHAR(8) DEFAULT NULL UNIQUE COMMENT 'Mã sinh viên 8 chữ số',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Hashed password for 'password' using PHP's password_hash('password', PASSWORD_DEFAULT)
 -- Replace this with your own hashed password if needed
-INSERT INTO users (username, password) VALUES ('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi')
+INSERT INTO users (username, password, student_code) VALUES ('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NULL)
 ON DUPLICATE KEY UPDATE username=username;
 
 CREATE TABLE IF NOT EXISTS students (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    student_code VARCHAR(20) NOT NULL UNIQUE,
+    student_code CHAR(8) NOT NULL UNIQUE COMMENT 'Mã sinh viên 8 chữ số, VD: 20239614',
     full_name VARCHAR(100) NOT NULL,
     date_of_birth DATE,
     gender ENUM('Male', 'Female'),

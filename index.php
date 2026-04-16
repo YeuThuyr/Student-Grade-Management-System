@@ -100,7 +100,7 @@ require_once __DIR__ . '/includes/header.php';
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title fw-semibold text-dark mb-2">Dashboard</h5>
                         <p class="card-text text-muted flex-grow-1" style="font-size: 0.9rem;">Bảng thống kê toàn cảnh dành cho cán bộ quản lý.</p>
-                        <a href="#" class="tc-btn d-inline-block px-3 py-1 align-self-start text-decoration-none rounded-pill fw-semibold" style="background-color: #fce4e4; color: var(--hust-red); font-size: 0.85rem; transition: all 0.3s ease;">Chi tiết <i class="fas fa-chevron-right ms-1" style="font-size: 0.75rem;"></i></a>
+                        <a href="dashboard.php" class="tc-btn d-inline-block px-3 py-1 align-self-start text-decoration-none rounded-pill fw-semibold" style="background-color: #fce4e4; color: var(--hust-red); font-size: 0.85rem; transition: all 0.3s ease;">Chi tiết <i class="fas fa-chevron-right ms-1" style="font-size: 0.75rem;"></i></a>
                     </div>
                 </div>
             </div>
