@@ -1,4 +1,4 @@
--- =============================================================
+﻿-- =============================================================
 -- Seed Data: Dữ liệu mẫu mở rộng
 -- =============================================================
 
@@ -6,28 +6,36 @@
 SET FOREIGN_KEY_CHECKS = 0;
 TRUNCATE TABLE grades;
 TRUNCATE TABLE subjects;
+TRUNCATE TABLE users;
 TRUNCATE TABLE students;
+TRUNCATE TABLE classes;
 SET FOREIGN_KEY_CHECKS = 1;
 
--- 2. Dữ liệu sinh viên (Đa dạng các năm: 2021, 2022, 2023, 2024)
-INSERT INTO students (student_code, full_name, date_of_birth, gender, email, phone, address) VALUES
-('20230001', 'Nguyễn Văn An', '2005-05-15', 'Male', 'an.nv@example.com', '0123456789', 'Hà Nội'),
-('20230002', 'Trần Thị Bình', '2005-08-20', 'Female', 'binh.tt@example.com', '0987654321', 'TP. Hồ Chí Minh'),
-('20239614', 'Lê Văn Cường', '2004-12-10', 'Male', 'cuong.lv@example.com', '0345678901', 'Đà Nẵng'),
-('20230010', 'Phạm Minh Đức', '2005-01-05', 'Male', 'duc.pm@example.com', '0912123456', 'Hải Phòng'),
-('20230025', 'Hoàng Ngọc Hà', '2005-11-22', 'Female', 'ha.hn@example.com', '0923234567', 'Cần Thơ'),
-('20220001', 'Vũ Việt Hùng', '2004-03-12', 'Male', 'hung.vv@example.com', '0934345678', 'Nghệ An'),
-('20220015', 'Đặng Thu Thảo', '2004-09-30', 'Female', 'thao.dt@example.com', '0945456789', 'Thái Bình'),
-('20240001', 'Bùi Xuân Huấn', '2006-02-14', 'Male', 'huan.bx@example.com', '0956567890', 'Lào Cai'),
-('20240456', 'Ngô Kiến Huy', '2006-07-08', 'Male', 'huy.nk@example.com', '0967678901', 'Gia Lai'),
-('20210012', 'Nguyễn Lan Anh', '2003-10-15', 'Female', 'anh.nl@example.com', '0978789012', 'Quảng Ninh'),
-('20230105', 'Trần Bảo Long', '2005-04-18', 'Male', 'long.tb@example.com', '0989890123', 'Bắc Ninh'),
-('20220500', 'Lý Hải', '2004-06-06', 'Male', 'hai.l@example.com', '0990901234', 'Tiền Giang'),
-('20238888', 'Sơn Tùng M-TP', '2005-07-05', 'Male', 'tung.st@example.com', '0911999888', 'Thái Bình'),
-('20231234', 'Nguyễn Thúc Thùy Tiên', '2005-08-12', 'Female', 'tien.ntt@example.com', '0922888777', 'TP. Hồ Chí Minh'),
-('20235555', 'Hieuthuhai', '2005-02-28', 'Male', 'hieu.thh@example.com', '0933777666', 'Đồng Nai');
+-- 2. Dữ liệu lớp học
+INSERT INTO classes (class_code, class_name, description) VALUES
+('CNTT-01', 'Công nghệ thông tin 1', 'Lớp chuyên ngành Công nghệ thông tin'),
+('CNTT-02', 'Công nghệ thông tin 2', 'Lớp chuyên ngành Công nghệ thông tin'),
+('KT-01', 'Kinh tế 1', 'Lớp chuyên ngành Kinh tế');
 
--- 3. Dữ liệu học phần
+-- 3. Dữ liệu sinh viên (Đa dạng các năm: 2021, 2022, 2023, 2024)
+INSERT INTO students (student_code, full_name, date_of_birth, gender, email, phone, address, class_id, is_active) VALUES
+('20230001', 'Nguyễn Văn An', '2005-05-15', 'Male', 'an.nv@example.com', '0123456789', 'Hà Nội', 1, 1),
+('20230002', 'Trần Thị Bình', '2005-08-20', 'Female', 'binh.tt@example.com', '0987654321', 'TP. Hồ Chí Minh', 1, 1),
+('20239614', 'Lê Văn Cường', '2004-12-10', 'Male', 'cuong.lv@example.com', '0345678901', 'Đà Nẵng', 2, 1),
+('20230010', 'Phạm Minh Đức', '2005-01-05', 'Male', 'duc.pm@example.com', '0912123456', 'Hải Phòng', 2, 1),
+('20230025', 'Hoàng Ngọc Hà', '2005-11-22', 'Female', 'ha.hn@example.com', '0923234567', 'Cần Thơ', 1, 1),
+('20220001', 'Vũ Việt Hùng', '2004-03-12', 'Male', 'hung.vv@example.com', '0934345678', 'Nghệ An', 3, 1),
+('20220015', 'Đặng Thu Thảo', '2004-09-30', 'Female', 'thao.dt@example.com', '0945456789', 'Thái Bình', 3, 1),
+('20240001', 'Bùi Xuân Huấn', '2006-02-14', 'Male', 'huan.bx@example.com', '0956567890', 'Lào Cai', 2, 1),
+('20240456', 'Ngô Kiến Huy', '2006-07-08', 'Male', 'huy.nk@example.com', '0967678901', 'Gia Lai', 2, 1),
+('20210012', 'Nguyễn Lan Anh', '2003-10-15', 'Female', 'anh.nl@example.com', '0978789012', 'Quảng Ninh', 1, 1),
+('20230105', 'Trần Bảo Long', '2005-04-18', 'Male', 'long.tb@example.com', '0989890123', 'Bắc Ninh', 1, 1),
+('20220500', 'Lý Hải', '2004-06-06', 'Male', 'hai.l@example.com', '0990901234', 'Tiền Giang', 3, 1),
+('20238888', 'Sơn Tùng M-TP', '2005-07-05', 'Male', 'tung.st@example.com', '0911999888', 'Thái Bình', 2, 1),
+('20231234', 'Nguyễn Thúc Thùy Tiên', '2005-08-12', 'Female', 'tien.ntt@example.com', '0922888777', 'TP. Hồ Chí Minh', 1, 1),
+('20235555', 'Hieuthuhai', '2005-02-28', 'Male', 'hieu.thh@example.com', '0933777666', 'Đồng Nai', 2, 1);
+
+-- 4. Dữ liệu học phần
 INSERT INTO subjects (subject_code, subject_name, credit, description) VALUES
 ('MATH101', 'Giải tích I', 3, 'Đạo hàm, tích phân và ứng dụng'),
 ('PHYS101', 'Vật lý đại cương I', 4, 'Cơ học cổ điển'),
@@ -38,11 +46,11 @@ INSERT INTO subjects (subject_code, subject_name, credit, description) VALUES
 ('ENG101', 'Tiếng Anh chuyên ngành', 2, 'Tiếng Anh kỹ thuật'),
 ('MKT101', 'Marketing cơ bản', 3, 'Nguyên lý Marketing');
 
--- 4. Dữ liệu điểm số (trộn lẫn các mức điểm)
+-- 5. Dữ liệu điểm số (trộn lẫn các mức điểm)
 -- Ghi chú: student_id sẽ tương ứng với thứ tự insert ở trên (1-15)
 INSERT INTO grades (student_id, subject_id, midterm_score, final_score, other_score, average_score, letter_grade, semester, academic_year) VALUES
 -- Sinh viên 1 (An)
-(1, 1, 8.5, 9.0, 10.0, 9.1, 'A', '1', '2023-2024'),
+(1, 1, 8.5, 9.0, 10.0, 9.1, 'A+', '1', '2023-2024'),
 (1, 2, 7.0, 8.0, 8.5, 7.8, 'B+', '1', '2023-2024'),
 (1, 4, 9.0, 9.5, 10.0, 9.5, 'A+', '1', '2023-2024'),
 -- Sinh viên 2 (Bình)
@@ -73,3 +81,22 @@ INSERT INTO grades (student_id, subject_id, midterm_score, final_score, other_sc
 (13, 8, 10.0, 9.5, 10.0, 9.8, 'A+', '1', '2023-2024'),
 -- Sinh viên 15 (Hieuthuhai)
 (15, 3, 8.0, 8.5, 9.0, 8.5, 'A', '1', '2023-2024');
+
+-- 6. Tài khoản mẫu
+INSERT INTO users (username, password, role, student_id, is_active) VALUES
+('admin', '$2y$10$LvYXyriTsrXpn93olLCXNeekAVHd4o6dm/VbwaMr9Pl0lA0dAEuqW', 'admin', NULL, 1),
+('20230001', '$2y$10$LvYXyriTsrXpn93olLCXNeekAVHd4o6dm/VbwaMr9Pl0lA0dAEuqW', 'student', 1, 1),
+('20230002', '$2y$10$LvYXyriTsrXpn93olLCXNeekAVHd4o6dm/VbwaMr9Pl0lA0dAEuqW', 'student', 2, 1),
+('20239614', '$2y$10$LvYXyriTsrXpn93olLCXNeekAVHd4o6dm/VbwaMr9Pl0lA0dAEuqW', 'student', 3, 1),
+('20230010', '$2y$10$LvYXyriTsrXpn93olLCXNeekAVHd4o6dm/VbwaMr9Pl0lA0dAEuqW', 'student', 4, 1),
+('20230025', '$2y$10$LvYXyriTsrXpn93olLCXNeekAVHd4o6dm/VbwaMr9Pl0lA0dAEuqW', 'student', 5, 1),
+('20220001', '$2y$10$LvYXyriTsrXpn93olLCXNeekAVHd4o6dm/VbwaMr9Pl0lA0dAEuqW', 'student', 6, 1),
+('20220015', '$2y$10$LvYXyriTsrXpn93olLCXNeekAVHd4o6dm/VbwaMr9Pl0lA0dAEuqW', 'student', 7, 1),
+('20240001', '$2y$10$LvYXyriTsrXpn93olLCXNeekAVHd4o6dm/VbwaMr9Pl0lA0dAEuqW', 'student', 8, 1),
+('20240456', '$2y$10$LvYXyriTsrXpn93olLCXNeekAVHd4o6dm/VbwaMr9Pl0lA0dAEuqW', 'student', 9, 1),
+('20210012', '$2y$10$LvYXyriTsrXpn93olLCXNeekAVHd4o6dm/VbwaMr9Pl0lA0dAEuqW', 'student', 10, 1),
+('20230105', '$2y$10$LvYXyriTsrXpn93olLCXNeekAVHd4o6dm/VbwaMr9Pl0lA0dAEuqW', 'student', 11, 1),
+('20220500', '$2y$10$LvYXyriTsrXpn93olLCXNeekAVHd4o6dm/VbwaMr9Pl0lA0dAEuqW', 'student', 12, 1),
+('20238888', '$2y$10$LvYXyriTsrXpn93olLCXNeekAVHd4o6dm/VbwaMr9Pl0lA0dAEuqW', 'student', 13, 1),
+('20231234', '$2y$10$LvYXyriTsrXpn93olLCXNeekAVHd4o6dm/VbwaMr9Pl0lA0dAEuqW', 'student', 14, 1),
+('20235555', '$2y$10$LvYXyriTsrXpn93olLCXNeekAVHd4o6dm/VbwaMr9Pl0lA0dAEuqW', 'student', 15, 1);

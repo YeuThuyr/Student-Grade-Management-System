@@ -1,3 +1,168 @@
 <?php
-echo "Edit";
+session_start();
+
+define('BASE_PATH', '../');
+define('IS_HOMEPAGE', false);
+require_once __DIR__ . '/../middleware/auth.php';
+require_once __DIR__ . '/../middleware/role.php';
+require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../includes/helpers.php';
+
+handleAuth();
+checkRole(['admin']);
+
+$studentId = intval($_GET['id'] ?? 0);
+if ($studentId <= 0) {
+    header('Location: ' . BASE_PATH . 'students/list.php');
+    exit();
+}
+
+$stmt = $pdo->prepare('SELECT * FROM students WHERE id = ?');
+$stmt->execute([$studentId]);
+$student = $stmt->fetch();
+if (!$student) {
+    die('Sinh viên không tồn tại.');
+}
+
+$values = [
+    'student_code' => $student['student_code'],
+    'full_name' => $student['full_name'],
+    'date_of_birth' => $student['date_of_birth'],
+    'gender' => $student['gender'],
+    'email' => $student['email'],
+    'phone' => $student['phone'],
+    'address' => $student['address'],
+    'class_id' => $student['class_id'] ?? ''
+];
+$errors = [];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    foreach ($values as $field => $value) {
+        $values[$field] = trim($_POST[$field] ?? '');
+    }
+
+    if ($values['student_code'] === '') {
+        $errors[] = 'Mã sinh viên là bắt buộc.';
+    } elseif (!preg_match('/^[0-9]{8}$/', $values['student_code'])) {
+        $errors[] = 'Mã sinh viên phải gồm 8 chữ số.';
+    }
+    if ($values['full_name'] === '') {
+        $errors[] = 'Tên sinh viên là bắt buộc.';
+    }
+    if ($values['email'] !== '' && !filter_var($values['email'], FILTER_VALIDATE_EMAIL)) {
+        $errors[] = 'Định dạng email không hợp lệ.';
+    }
+
+    if (empty($errors)) {
+        $checkStmt = $pdo->prepare('SELECT COUNT(*) FROM students WHERE student_code = ? AND id <> ?');
+        $checkStmt->execute([$values['student_code'], $studentId]);
+        if ($checkStmt->fetchColumn() > 0) {
+            $errors[] = 'Mã sinh viên đã được sử dụng bởi sinh viên khác.';
+        }
+    }
+
+    if (empty($errors)) {
+        $updateStmt = $pdo->prepare(
+            'UPDATE students SET student_code = ?, full_name = ?, date_of_birth = ?, gender = ?, email = ?, phone = ?, address = ?, class_id = ? WHERE id = ?'
+        );
+        $updateStmt->execute([
+            $values['student_code'],
+            $values['full_name'],
+            $values['date_of_birth'] ?: null,
+            $values['gender'] ?: null,
+            $values['email'] ?: null,
+            $values['phone'] ?: null,
+            $values['address'] ?: null,
+            $values['class_id'] ?: null,
+            $studentId,
+        ]);
+
+        $updateUser = $pdo->prepare('UPDATE users SET username = ? WHERE student_id = ?');
+        $updateUser->execute([$values['student_code'], $studentId]);
+
+        header('Location: ' . BASE_PATH . 'students/list.php?updated=1');
+        exit();
+    }
+}
+
+$classStmt = $pdo->query('SELECT id, class_name FROM classes ORDER BY class_name ASC');
+$classes = $classStmt->fetchAll();
+require_once __DIR__ . '/../includes/header.php';
 ?>
+
+<div class="container py-5 mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold">Chỉnh sửa sinh viên</h2>
+            <p class="text-muted">Cập nhật thông tin sinh viên và đồng bộ mã đăng nhập.</p>
+        </div>
+        <a href="<?php echo BASE_PATH; ?>students/list.php" class="btn btn-outline-secondary">Quay lại danh sách</a>
+    </div>
+
+    <?php if (!empty($errors)): ?>
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                <?php foreach ($errors as $error): ?>
+                    <li><?php echo e($error); ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
+
+    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+        <form method="POST">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Mã sinh viên</label>
+                    <input type="text" name="student_code" class="form-control"
+                        value="<?php echo e($values['student_code']); ?>" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Họ và tên</label>
+                    <input type="text" name="full_name" class="form-control"
+                        value="<?php echo e($values['full_name']); ?>" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Ngày sinh</label>
+                    <input type="date" name="date_of_birth" class="form-control"
+                        value="<?php echo e($values['date_of_birth']); ?>">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Giới tính</label>
+                    <select name="gender" class="form-select">
+                        <option value="">Chọn giới tính</option>
+                        <option value="Male" <?php echo $values['gender'] === 'Male' ? 'selected' : ''; ?>>Nam</option>
+                        <option value="Female" <?php echo $values['gender'] === 'Female' ? 'selected' : ''; ?>>Nữ</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Lớp</label>
+                    <select name="class_id" class="form-select">
+                        <option value="">Chọn lớp</option>
+                        <?php foreach ($classes as $class): ?>
+                            <option value="<?php echo e($class['id']); ?>" <?php echo $values['class_id'] == $class['id'] ? 'selected' : ''; ?>><?php echo e($class['class_name']); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" value="<?php echo e($values['email']); ?>">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Số điện thoại</label>
+                    <input type="text" name="phone" class="form-control" value="<?php echo e($values['phone']); ?>">
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Địa chỉ</label>
+                    <textarea name="address" class="form-control"
+                        rows="3"><?php echo e($values['address']); ?></textarea>
+                </div>
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-hust">Cập nhật sinh viên</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>
