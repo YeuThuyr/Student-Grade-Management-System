@@ -29,7 +29,12 @@ yarn-error.log*
 cache/
 tmp/
 temp/
+tmp_*.php
+tmp_*.sql
 *.cache
+
+# Tool caches / local metadata
+.grapuco/
 
 # =========================
 # OS generated files
