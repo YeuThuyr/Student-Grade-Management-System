@@ -8,44 +8,80 @@ require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/helpers.php';
 
 $studentCode = trim($_GET['student_code'] ?? '');
-$student = null;
-$grades = [];
-$gpa = null;
-$searched = $studentCode !== '';
+$academicYear = trim($_GET['academic_year'] ?? '');
+$students = [];
+$studentGrades = [];
+$studentGpas = [];
+$searched = $studentCode !== '' || $academicYear !== '';
 $error = '';
 
+$yearStmt = $pdo->query('SELECT DISTINCT academic_year FROM grades WHERE academic_year IS NOT NULL ORDER BY academic_year DESC');
+$academicYears = $yearStmt->fetchAll();
+
 if ($searched) {
-    if (!preg_match('/^[0-9]{8}$/', $studentCode)) {
-        $error = 'Mã sinh viên phải gồm 8 chữ số.';
+    if ($studentCode !== '' && !preg_match('/^[0-9]{1,8}$/', $studentCode)) {
+        $error = 'Mã sinh viên chỉ được nhập số và tối đa 8 chữ số.';
     } else {
+        $where = ['s.is_active = 1'];
+        $params = [];
+
+        if ($studentCode !== '') {
+            $where[] = 's.student_code LIKE ?';
+            $params[] = '%' . $studentCode . '%';
+        }
+
+        if ($academicYear !== '') {
+            $where[] = 'EXISTS (
+                SELECT 1
+                FROM grades gy
+                WHERE gy.student_id = s.id AND gy.academic_year = ?
+            )';
+            $params[] = $academicYear;
+        }
+
+        $whereSql = implode(' AND ', $where);
         $studentStmt = $pdo->prepare(
-            'SELECT s.id, s.student_code, s.full_name, s.date_of_birth, s.gender, s.email, s.phone, c.class_name
+            "SELECT s.id, s.student_code, s.full_name, s.date_of_birth, s.gender, s.email, s.phone, c.class_name
              FROM students s
              LEFT JOIN classes c ON s.class_id = c.id
-             WHERE s.student_code = ? AND s.is_active = 1'
+             WHERE $whereSql
+             ORDER BY s.student_code ASC"
         );
-        $studentStmt->execute([$studentCode]);
-        $student = $studentStmt->fetch();
+        $studentStmt->execute($params);
+        $students = $studentStmt->fetchAll();
 
-        if ($student) {
-            $gradesStmt = $pdo->prepare(
-                'SELECT subj.subject_code, subj.subject_name, subj.credit,
+        $gradesSql = 'SELECT subj.subject_code, subj.subject_name, subj.credit,
                         g.midterm_score, g.final_score, g.other_score, g.average_score,
                         g.letter_grade, g.semester, g.academic_year
-                 FROM grades g
-                 JOIN subjects subj ON g.subject_id = subj.id
-                 WHERE g.student_id = ?
-                 ORDER BY g.academic_year DESC, g.semester ASC, subj.subject_code ASC'
-            );
-            $gradesStmt->execute([$student['id']]);
+                     FROM grades g
+                     JOIN subjects subj ON g.subject_id = subj.id
+                     WHERE g.student_id = ?';
+
+        if ($academicYear !== '') {
+            $gradesSql .= ' AND g.academic_year = ?';
+        }
+
+        $gradesSql .= ' ORDER BY g.academic_year DESC, g.semester ASC, subj.subject_code ASC';
+        $gradesStmt = $pdo->prepare($gradesSql);
+
+        foreach ($students as $student) {
+            $gradeParams = [$student['id']];
+            if ($academicYear !== '') {
+                $gradeParams[] = $academicYear;
+            }
+
+            $gradesStmt->execute($gradeParams);
             $grades = $gradesStmt->fetchAll();
+            $studentGrades[$student['id']] = $grades;
 
             if (!empty($grades)) {
                 $total = 0;
                 foreach ($grades as $grade) {
                     $total += (float) $grade['average_score'];
                 }
-                $gpa = round($total / count($grades), 2);
+                $studentGpas[$student['id']] = round($total / count($grades), 2);
+            } else {
+                $studentGpas[$student['id']] = null;
             }
         }
     }
@@ -54,23 +90,36 @@ if ($searched) {
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-<main class="bg-white py-5 flex-grow-1">
+<main class="homepage-main flex-grow-1">
     <div class="container py-4">
         <div class="row justify-content-center mb-4">
-            <div class="col-12 col-lg-8">
-                <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+            <div class="col-12 col-lg-10">
+                <div class="card border-0 shadow rounded-4 p-4 p-md-5 homepage-search-card">
                     <div class="text-center mb-4">
                         <h1 class="fw-bold mb-2">Tra cứu điểm sinh viên</h1>
-                        <p class="text-muted mb-0">Nhập mã sinh viên để xem bảng điểm và kết quả học tập.</p>
+                        <p class="text-muted mb-0">Nhập một phần mã sinh viên và lọc theo năm học để xem bảng điểm.</p>
                     </div>
 
                     <form method="GET" action="index.php" class="row g-3 align-items-end">
-                        <div class="col-12 col-md-9">
+                        <div class="col-12 col-md-5">
                             <label for="student_code" class="form-label fw-semibold">Mã sinh viên</label>
                             <input type="text" class="form-control form-control-lg" id="student_code"
-                                name="student_code" value="<?php echo e($studentCode); ?>" placeholder="Ví dụ: 20230001"
-                                maxlength="8" inputmode="numeric" pattern="[0-9]{8}" required>
+                                name="student_code" value="<?php echo e($studentCode); ?>" placeholder="Ví dụ: 2023"
+                                maxlength="8" inputmode="numeric" pattern="[0-9]{1,8}">
                         </div>
+
+                        <div class="col-12 col-md-4">
+                            <label for="academic_year" class="form-label fw-semibold">Năm học</label>
+                            <select class="form-select form-select-lg" id="academic_year" name="academic_year">
+                                <option value="">Tất cả năm học</option>
+                                <?php foreach ($academicYears as $year): ?>
+                                    <option value="<?php echo e($year['academic_year']); ?>" <?php echo $academicYear === $year['academic_year'] ? 'selected' : ''; ?>>
+                                        <?php echo e($year['academic_year']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
                         <div class="col-12 col-md-3">
                             <button type="submit" class="btn btn-hust btn-lg w-100">
                                 <i class="fas fa-search me-1"></i> Tra cứu
@@ -86,78 +135,92 @@ require_once __DIR__ . '/includes/header.php';
         </div>
 
         <?php if ($searched && $error === ''): ?>
-            <?php if (!$student): ?>
+            <?php if (empty($students)): ?>
                 <div class="row justify-content-center">
-                    <div class="col-12 col-lg-8">
+                    <div class="col-12 col-lg-10">
                         <div class="alert alert-warning shadow-sm mb-0">
-                            Không tìm thấy sinh viên có mã <strong><?php echo e($studentCode); ?></strong>.
+                            Không tìm thấy sinh viên phù hợp với điều kiện tra cứu.
                         </div>
                     </div>
                 </div>
             <?php else: ?>
-                <div class="card border-0 shadow-sm rounded-4 mb-4">
-                    <div class="card-body p-4">
-                        <div class="row g-3 align-items-center">
-                            <div class="col-12 col-lg-8">
-                                <h2 class="h4 fw-bold mb-2"><?php echo e($student['full_name']); ?></h2>
-                                <div class="text-muted">
-                                    <?php echo e($student['student_code']); ?>
-                                    <?php if (!empty($student['class_name'])): ?>
-                                        <span class="mx-2">|</span><?php echo e($student['class_name']); ?>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                            <div class="col-12 col-lg-4 text-lg-end">
-                                <span class="badge bg-danger-subtle text-danger fs-6 px-3 py-2">
-                                    GPA: <?php echo $gpa === null ? 'N/A' : e($gpa); ?>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h4 fw-bold mb-0">Kết quả tra cứu</h2>
+                    <span class="badge bg-danger-subtle text-danger fs-6 px-3 py-2">
+                        <?php echo count($students); ?> sinh viên
+                    </span>
                 </div>
 
-                <div class="card border-0 shadow-sm rounded-4 bg-white">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>#</th>
-                                    <th>Môn học</th>
-                                    <th>Tín chỉ</th>
-                                    <th>HK</th>
-                                    <th>Năm học</th>
-                                    <th>Giữa kỳ</th>
-                                    <th>Cuối kỳ</th>
-                                    <th>Khác</th>
-                                    <th>TB</th>
-                                    <th>Điểm chữ</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php if (empty($grades)): ?>
+                <?php foreach ($students as $studentIndex => $student): ?>
+                    <?php
+                    $grades = $studentGrades[$student['id']] ?? [];
+                    $gpa = $studentGpas[$student['id']] ?? null;
+                    ?>
+                    <div class="card border-0 shadow-sm rounded-4 mb-4">
+                        <div class="card-body p-4">
+                            <div class="row g-3 align-items-center">
+                                <div class="col-12 col-lg-8">
+                                    <h3 class="h5 fw-bold mb-2"><?php echo e($student['full_name']); ?></h3>
+                                    <div class="text-muted">
+                                        <?php echo e($student['student_code']); ?>
+                                        <?php if (!empty($student['class_name'])): ?>
+                                            <span class="mx-2">|</span><?php echo e($student['class_name']); ?>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-4 text-lg-end">
+                                    <span class="badge bg-danger-subtle text-danger fs-6 px-3 py-2">
+                                        GPA: <?php echo $gpa === null ? 'N/A' : e(number_format($gpa, 2)); ?>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
                                     <tr>
-                                        <td colspan="10" class="text-center text-muted py-4">Sinh viên này chưa có điểm.</td>
+                                        <th>#</th>
+                                        <th>Môn học</th>
+                                        <th>Tín chỉ</th>
+                                        <th>HK</th>
+                                        <th>Năm học</th>
+                                        <th>Giữa kỳ</th>
+                                        <th>Cuối kỳ</th>
+                                        <th>Khác</th>
+                                        <th>TB</th>
+                                        <th>Điểm chữ</th>
                                     </tr>
-                                <?php else: ?>
-                                    <?php foreach ($grades as $index => $grade): ?>
+                                </thead>
+                                <tbody>
+                                    <?php if (empty($grades)): ?>
                                         <tr>
-                                            <td><?php echo e($index + 1); ?></td>
-                                            <td><?php echo e($grade['subject_code'] . ' - ' . $grade['subject_name']); ?></td>
-                                            <td><?php echo e($grade['credit']); ?></td>
-                                            <td><?php echo e($grade['semester']); ?></td>
-                                            <td><?php echo e($grade['academic_year']); ?></td>
-                                            <td><?php echo e($grade['midterm_score']); ?></td>
-                                            <td><?php echo e($grade['final_score']); ?></td>
-                                            <td><?php echo e($grade['other_score']); ?></td>
-                                            <td><?php echo e($grade['average_score']); ?></td>
-                                            <td><?php echo e($grade['letter_grade']); ?></td>
+                                            <td colspan="10" class="text-center text-muted py-4">Sinh viên này chưa có điểm.</td>
                                         </tr>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
+                                    <?php else: ?>
+                                        <?php foreach ($grades as $index => $grade): ?>
+                                            <tr>
+                                                <td><?php echo e($index + 1); ?></td>
+                                                <td><?php echo e($grade['subject_code'] . ' - ' . $grade['subject_name']); ?></td>
+                                                <td><?php echo e($grade['credit']); ?></td>
+                                                <td><?php echo e($grade['semester']); ?></td>
+                                                <td><?php echo e($grade['academic_year']); ?></td>
+                                                <td><?php echo e($grade['midterm_score']); ?></td>
+                                                <td><?php echo e($grade['final_score']); ?></td>
+                                                <td><?php echo e($grade['other_score']); ?></td>
+                                                <td><?php echo e($grade['average_score']); ?></td>
+                                                <td><?php echo e($grade['letter_grade']); ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
+                    <?php if ($studentIndex < count($students) - 1): ?>
+                        <hr class="my-4">
+                    <?php endif; ?>
+                <?php endforeach; ?>
             <?php endif; ?>
         <?php endif; ?>
     </div>

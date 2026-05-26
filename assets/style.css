@@ -89,6 +89,18 @@ body {
     height: 600px;
 }
 
+.homepage-main {
+    position: relative;
+    z-index: 2;
+    margin-top: -360px;
+    padding-bottom: 3rem;
+}
+
+.homepage-search-card {
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(8px);
+}
+
 .hero-overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
