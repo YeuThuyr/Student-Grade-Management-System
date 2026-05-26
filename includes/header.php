@@ -105,7 +105,7 @@ if (!defined('BASE_PATH')) {
                             <?php endif; ?>
                         <?php endif; ?>
                         <li class="nav-item">
-                            <a class="nav-link nav-link-custom" href="#">Liên Hệ Và Phản Hồi</a>
+                            <a class="nav-link nav-link-custom" href="<?php echo BASE_PATH; ?>contact.php">Liên Hệ Và Phản Hồi</a>
                         </li>
                     </ul>
 

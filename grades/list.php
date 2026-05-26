@@ -121,7 +121,7 @@ require_once __DIR__ . '/../includes/header.php';
         </form>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4 bg-white">
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
