@@ -1,167 +1,166 @@
 <?php
 session_start();
 
-$isLoggedIn = isset($_SESSION['user_id']);
-
-// Các hằng số điều khiển việc hiển thị trong header/footer
 define('IS_HOMEPAGE', true);
-define('SHOW_APP_SECTION', true);
+define('SHOW_APP_SECTION', false);
 
-// Nạp Header
+require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/includes/helpers.php';
+
+$studentCode = trim($_GET['student_code'] ?? '');
+$student = null;
+$grades = [];
+$gpa = null;
+$searched = $studentCode !== '';
+$error = '';
+
+if ($searched) {
+    if (!preg_match('/^[0-9]{8}$/', $studentCode)) {
+        $error = 'Mã sinh viên phải gồm 8 chữ số.';
+    } else {
+        $studentStmt = $pdo->prepare(
+            'SELECT s.id, s.student_code, s.full_name, s.date_of_birth, s.gender, s.email, s.phone, c.class_name
+             FROM students s
+             LEFT JOIN classes c ON s.class_id = c.id
+             WHERE s.student_code = ? AND s.is_active = 1'
+        );
+        $studentStmt->execute([$studentCode]);
+        $student = $studentStmt->fetch();
+
+        if ($student) {
+            $gradesStmt = $pdo->prepare(
+                'SELECT subj.subject_code, subj.subject_name, subj.credit,
+                        g.midterm_score, g.final_score, g.other_score, g.average_score,
+                        g.letter_grade, g.semester, g.academic_year
+                 FROM grades g
+                 JOIN subjects subj ON g.subject_id = subj.id
+                 WHERE g.student_id = ?
+                 ORDER BY g.academic_year DESC, g.semester ASC, subj.subject_code ASC'
+            );
+            $gradesStmt->execute([$student['id']]);
+            $grades = $gradesStmt->fetchAll();
+
+            if (!empty($grades)) {
+                $total = 0;
+                foreach ($grades as $grade) {
+                    $total += (float) $grade['average_score'];
+                }
+                $gpa = round($total / count($grades), 2);
+            }
+        }
+    }
+}
+
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-    <!-- 2. TEACHER SERVICES SECTION -->
-    <section class="container py-5 mt-4" id="giang-vien">
-        <h2 class="section-title text-center fw-bold text-dark mb-5">Dịch Vụ Cho Giảng Viên</h2>
-        
-        <div class="row g-4">
-            <!-- Card 1 -->
-            <div class="col-12 col-md-6 col-lg-3">
-                <div class="card h-100 shadow-sm rounded-3 teacher-card">
-                    <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="card-img-top" alt="Giảng Dạy" style="height: 140px; object-fit: cover;">
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title fw-semibold text-dark mb-2">Giảng Dạy</h5>
-                        <p class="card-text text-muted flex-grow-1" style="font-size: 0.9rem;">Kế hoạch giảng dạy, thời khóa biểu và quản lý lớp học phần.</p>
-                        <a href="#" class="tc-btn d-inline-block px-3 py-1 align-self-start text-decoration-none rounded-pill fw-semibold" style="background-color: #fce4e4; color: var(--hust-red); font-size: 0.85rem; transition: all 0.3s ease;">Chi tiết <i class="fas fa-chevron-right ms-1" style="font-size: 0.75rem;"></i></a>
+<main class="bg-white py-5 flex-grow-1">
+    <div class="container py-4">
+        <div class="row justify-content-center mb-4">
+            <div class="col-12 col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <h1 class="fw-bold mb-2">Tra cứu điểm sinh viên</h1>
+                        <p class="text-muted mb-0">Nhập mã sinh viên để xem bảng điểm và kết quả học tập.</p>
                     </div>
-                </div>
-            </div>
-            <!-- Card 2 -->
-            <div class="col-12 col-md-6 col-lg-3">
-                <div class="card h-100 shadow-sm rounded-3 teacher-card">
-                    <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="card-img-top" alt="Hướng Dẫn" style="height: 140px; object-fit: cover;">
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title fw-semibold text-dark mb-2">Hướng Dẫn</h5>
-                        <p class="card-text text-muted flex-grow-1" style="font-size: 0.9rem;">Quản lý sinh viên thực tập, đồ án tốt nghiệp, hướng dẫn NCKH.</p>
-                        <a href="#" class="tc-btn d-inline-block px-3 py-1 align-self-start text-decoration-none rounded-pill fw-semibold" style="background-color: #fce4e4; color: var(--hust-red); font-size: 0.85rem; transition: all 0.3s ease;">Chi tiết <i class="fas fa-chevron-right ms-1" style="font-size: 0.75rem;"></i></a>
-                    </div>
-                </div>
-            </div>
-            <!-- Card 3 -->
-            <div class="col-12 col-md-6 col-lg-3">
-                <div class="card h-100 shadow-sm rounded-3 teacher-card">
-                    <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="card-img-top" alt="Phân Công" style="height: 140px; object-fit: cover;">
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title fw-semibold text-dark mb-2">Phân Công</h5>
-                        <p class="card-text text-muted flex-grow-1" style="font-size: 0.9rem;">Tra cứu khối lượng công việc, lịch trực và phân công giảng dạy.</p>
-                        <a href="#" class="tc-btn d-inline-block px-3 py-1 align-self-start text-decoration-none rounded-pill fw-semibold" style="background-color: #fce4e4; color: var(--hust-red); font-size: 0.85rem; transition: all 0.3s ease;">Chi tiết <i class="fas fa-chevron-right ms-1" style="font-size: 0.75rem;"></i></a>
-                    </div>
-                </div>
-            </div>
-            <!-- Card 4 -->
-            <div class="col-12 col-md-6 col-lg-3">
-                <div class="card h-100 shadow-sm rounded-3 teacher-card">
-                    <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="card-img-top" alt="Tổ Chức Cán Bộ" style="height: 140px; object-fit: cover;">
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title fw-semibold text-dark mb-2">Tổ Chức Cán Bộ</h5>
-                        <p class="card-text text-muted flex-grow-1" style="font-size: 0.9rem;">Hồ sơ cán bộ, đánh giá xếp loại và thông tin nhân sự.</p>
-                        <a href="#" class="tc-btn d-inline-block px-3 py-1 align-self-start text-decoration-none rounded-pill fw-semibold" style="background-color: #fce4e4; color: var(--hust-red); font-size: 0.85rem; transition: all 0.3s ease;">Chi tiết <i class="fas fa-chevron-right ms-1" style="font-size: 0.75rem;"></i></a>
-                    </div>
-                </div>
-            </div>
-            <!-- Card 5 -->
-            <div class="col-12 col-md-6 col-lg-3">
-                <div class="card h-100 shadow-sm rounded-3 teacher-card">
-                    <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="card-img-top" alt="Cơ Sở Vật Chất" style="height: 140px; object-fit: cover;">
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title fw-semibold text-dark mb-2">Cơ Sở Vật Chất</h5>
-                        <p class="card-text text-muted flex-grow-1" style="font-size: 0.9rem;">Đăng ký phòng học, mượn trang thiết bị và báo cáo sửa chữa.</p>
-                        <a href="#" class="tc-btn d-inline-block px-3 py-1 align-self-start text-decoration-none rounded-pill fw-semibold" style="background-color: #fce4e4; color: var(--hust-red); font-size: 0.85rem; transition: all 0.3s ease;">Chi tiết <i class="fas fa-chevron-right ms-1" style="font-size: 0.75rem;"></i></a>
-                    </div>
-                </div>
-            </div>
-            <!-- Card 6 -->
-            <div class="col-12 col-md-6 col-lg-3">
-                <div class="card h-100 shadow-sm rounded-3 teacher-card">
-                    <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="card-img-top" alt="Hợp Tác Đối Ngoại" style="height: 140px; object-fit: cover;">
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title fw-semibold text-dark mb-2">Hợp Tác Đối Ngoại</h5>
-                        <p class="card-text text-muted flex-grow-1" style="font-size: 0.9rem;">Chương trình trao đổi, học thuật, quản lý dự án quốc tế.</p>
-                        <a href="#" class="tc-btn d-inline-block px-3 py-1 align-self-start text-decoration-none rounded-pill fw-semibold" style="background-color: #fce4e4; color: var(--hust-red); font-size: 0.85rem; transition: all 0.3s ease;">Chi tiết <i class="fas fa-chevron-right ms-1" style="font-size: 0.75rem;"></i></a>
-                    </div>
-                </div>
-            </div>
-            <!-- Card 7 -->
-            <div class="col-12 col-md-6 col-lg-3">
-                <div class="card h-100 shadow-sm rounded-3 teacher-card">
-                    <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="card-img-top" alt="Học Viên" style="height: 140px; object-fit: cover;">
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title fw-semibold text-dark mb-2">Học Viên</h5>
-                        <p class="card-text text-muted flex-grow-1" style="font-size: 0.9rem;">Thông tin học viên Sau Đại học, bảo vệ luận văn, luận án.</p>
-                        <a href="#" class="tc-btn d-inline-block px-3 py-1 align-self-start text-decoration-none rounded-pill fw-semibold" style="background-color: #fce4e4; color: var(--hust-red); font-size: 0.85rem; transition: all 0.3s ease;">Chi tiết <i class="fas fa-chevron-right ms-1" style="font-size: 0.75rem;"></i></a>
-                    </div>
-                </div>
-            </div>
-            <!-- Card 8 -->
-            <div class="col-12 col-md-6 col-lg-3">
-                <div class="card h-100 shadow-sm rounded-3 teacher-card">
-                    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="card-img-top" alt="Dashboard" style="height: 140px; object-fit: cover;">
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title fw-semibold text-dark mb-2">Dashboard</h5>
-                        <p class="card-text text-muted flex-grow-1" style="font-size: 0.9rem;">Bảng thống kê toàn cảnh dành cho cán bộ quản lý.</p>
-                        <a href="dashboard.php" class="tc-btn d-inline-block px-3 py-1 align-self-start text-decoration-none rounded-pill fw-semibold" style="background-color: #fce4e4; color: var(--hust-red); font-size: 0.85rem; transition: all 0.3s ease;">Chi tiết <i class="fas fa-chevron-right ms-1" style="font-size: 0.75rem;"></i></a>
-                    </div>
-                </div>
-            </div>
-            
 
+                    <form method="GET" action="index.php" class="row g-3 align-items-end">
+                        <div class="col-12 col-md-9">
+                            <label for="student_code" class="form-label fw-semibold">Mã sinh viên</label>
+                            <input type="text" class="form-control form-control-lg" id="student_code"
+                                name="student_code" value="<?php echo e($studentCode); ?>" placeholder="Ví dụ: 20230001"
+                                maxlength="8" inputmode="numeric" pattern="[0-9]{8}" required>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <button type="submit" class="btn btn-hust btn-lg w-100">
+                                <i class="fas fa-search me-1"></i> Tra cứu
+                            </button>
+                        </div>
+                    </form>
+
+                    <?php if ($error !== ''): ?>
+                        <div class="alert alert-danger mt-4 mb-0"><?php echo e($error); ?></div>
+                    <?php endif; ?>
+                </div>
+            </div>
         </div>
-    </section>
 
-    <!-- 3. STUDENT SERVICES SECTION -->
-    <section class="bg-white py-5 shadow-sm" id="sinh-vien">
-        <div class="container py-4">
-            <h2 class="section-title text-center fw-bold text-dark mb-5">Dịch Vụ Cho Sinh Viên</h2>
-            
-
-
-            <div class="row g-4">
-                <!-- Data for Student Cards -->
-                <?php
-                $studentServices = [
-                    ['icon' => 'fa-envelope', 'title' => 'Thư Báo Tin Nhắn', 'desc' => 'Hộp thư điện tử, thông báo.'],
-                    ['icon' => 'fa-money-bill-wave', 'title' => 'Học Phí Công Nợ', 'desc' => 'Thanh toán và tra cứu học phí.'],
-                    ['icon' => 'fa-briefcase', 'title' => 'Hướng Nghiệp', 'desc' => 'Cơ hội việc làm, thực tập doanh nghiệp.'],
-                    ['icon' => 'fa-id-card', 'title' => 'Hồ Sơ Sinh Viên', 'desc' => 'Cập nhật thông tin lý lịch cá nhân.'],
-                    ['icon' => 'fa-file-invoice', 'title' => 'Đồ Án Tốt Nghiệp', 'desc' => 'Đăng ký và theo dõi tiến độ đồ án.'],
-                    ['icon' => 'fa-award', 'title' => 'Học Bổng', 'desc' => 'Khuyến khích học tập, học bổng tài trợ.'],
-                    ['icon' => 'fa-calendar-alt', 'title' => 'Thời Khoá Biểu', 'desc' => 'Lịch học, lịch thi cá nhân.'],
-                    ['icon' => 'fa-book-open', 'title' => 'Chương Trình Đào Tạo', 'desc' => 'Niên giám, chuẩn đầu ra, học phần.'],
-                    ['icon' => 'fa-clipboard-list', 'title' => 'Thủ Tục Hành Chính', 'desc' => 'Cấp giấy chứng nhận, thẻ sinh viên.'],
-                    ['icon' => 'fa-chart-line', 'title' => 'Kết Quả Học Tập', 'desc' => 'Bảng điểm, đánh giá quá trình học.'],
-                    ['icon' => 'fa-running', 'title' => 'Hoạt Động Ngoại Khoá', 'desc' => 'Câu lạc bộ, điểm rèn luyện.'],
-                    ['icon' => 'fa-plus-circle', 'title' => 'Đăng Ký Dịch Vụ', 'desc' => 'Mua BHYT, internet ký túc xá.'],
-                    ['icon' => 'fa-pen-square', 'title' => 'Đăng Ký Học Tập', 'desc' => 'Đăng ký lớp học phần, học cải thiện.'],
-                    ['icon' => 'fa-star', 'title' => 'Đánh Giá Rèn Luyện', 'desc' => 'Phiếu đánh giá, phản hồi môn học.'],
-                    ['icon' => 'fa-laptop', 'title' => 'Thư Viện Số', 'desc' => 'Tra cứu sách, mượn tài liệu số.'],
-                    ['icon' => 'fa-question-circle', 'title' => 'Trợ Giúp', 'desc' => 'Hỏi đáp, tư vấn tâm lý học đường.'],
-                    ['icon' => 'fa-home', 'title' => 'Ký Túc Xá', 'desc' => 'Đăng ký phòng, thanh toán tiền lưu trú.'],
-                    ['icon' => 'fa-balance-scale', 'title' => 'Văn Bản Pháp Luật', 'desc' => 'Quy chế nội quy, quy định sinh viên.']
-                ];
-                
-                foreach ($studentServices as $service) {
-                    echo '
-                    <div class="col-12 col-md-6 col-lg-4">
-                        <div class="card h-100 rounded-3 p-3 student-card">
-                            <div class="d-flex align-items-center">
-                                <div class="sc-icon flex-shrink-0 me-3">
-                                    <i class="fas ' . $service['icon'] . '"></i>
-                                </div>
-                                <div>
-                                    <h6 class="fw-bold mb-1 text-dark">' . $service['title'] . '</h6>
-                                    <p class="text-muted mb-0" style="font-size: 0.85rem;">' . $service['desc'] . '</p>
+        <?php if ($searched && $error === ''): ?>
+            <?php if (!$student): ?>
+                <div class="row justify-content-center">
+                    <div class="col-12 col-lg-8">
+                        <div class="alert alert-warning shadow-sm mb-0">
+                            Không tìm thấy sinh viên có mã <strong><?php echo e($studentCode); ?></strong>.
+                        </div>
+                    </div>
+                </div>
+            <?php else: ?>
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body p-4">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-12 col-lg-8">
+                                <h2 class="h4 fw-bold mb-2"><?php echo e($student['full_name']); ?></h2>
+                                <div class="text-muted">
+                                    <?php echo e($student['student_code']); ?>
+                                    <?php if (!empty($student['class_name'])): ?>
+                                        <span class="mx-2">|</span><?php echo e($student['class_name']); ?>
+                                    <?php endif; ?>
                                 </div>
                             </div>
+                            <div class="col-12 col-lg-4 text-lg-end">
+                                <span class="badge bg-danger-subtle text-danger fs-6 px-3 py-2">
+                                    GPA: <?php echo $gpa === null ? 'N/A' : e($gpa); ?>
+                                </span>
+                            </div>
                         </div>
-                    </div>';
-                }
-                ?>
-            </div>
-        </div>
-    </section>
+                    </div>
+                </div>
 
-<?php 
-// Nạp Footer
-require_once __DIR__ . '/includes/footer.php'; 
-?>
+                <div class="card border-0 shadow-sm rounded-4 bg-white">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Môn học</th>
+                                    <th>Tín chỉ</th>
+                                    <th>HK</th>
+                                    <th>Năm học</th>
+                                    <th>Giữa kỳ</th>
+                                    <th>Cuối kỳ</th>
+                                    <th>Khác</th>
+                                    <th>TB</th>
+                                    <th>Điểm chữ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (empty($grades)): ?>
+                                    <tr>
+                                        <td colspan="10" class="text-center text-muted py-4">Sinh viên này chưa có điểm.</td>
+                                    </tr>
+                                <?php else: ?>
+                                    <?php foreach ($grades as $index => $grade): ?>
+                                        <tr>
+                                            <td><?php echo e($index + 1); ?></td>
+                                            <td><?php echo e($grade['subject_code'] . ' - ' . $grade['subject_name']); ?></td>
+                                            <td><?php echo e($grade['credit']); ?></td>
+                                            <td><?php echo e($grade['semester']); ?></td>
+                                            <td><?php echo e($grade['academic_year']); ?></td>
+                                            <td><?php echo e($grade['midterm_score']); ?></td>
+                                            <td><?php echo e($grade['final_score']); ?></td>
+                                            <td><?php echo e($grade['other_score']); ?></td>
+                                            <td><?php echo e($grade['average_score']); ?></td>
+                                            <td><?php echo e($grade['letter_grade']); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            <?php endif; ?>
+        <?php endif; ?>
+    </div>
+</main>
+
+<?php require_once __DIR__ . '/includes/footer.php'; ?>
