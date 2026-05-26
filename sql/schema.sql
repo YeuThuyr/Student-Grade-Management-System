@@ -1,4 +1,8 @@
-CREATE DATABASE IF NOT EXISTS grade_management;
+SET NAMES utf8mb4;
+
+CREATE DATABASE IF NOT EXISTS grade_management
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
 USE grade_management;
 
 CREATE TABLE IF NOT EXISTS classes (

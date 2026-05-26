@@ -2,6 +2,8 @@
 -- Seed Data: Dữ liệu mẫu mở rộng
 -- =============================================================
 
+SET NAMES utf8mb4;
+
 -- 1. Xóa dữ liệu cũ (để tránh lỗi trùng khóa khi chạy lại)
 SET FOREIGN_KEY_CHECKS = 0;
 TRUNCATE TABLE grades;
