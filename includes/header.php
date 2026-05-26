@@ -105,17 +105,6 @@ if (!defined('BASE_PATH')) {
                             <?php endif; ?>
                         <?php endif; ?>
                         <li class="nav-item">
-                            <a class="nav-link nav-link-custom"
-                                href="<?php echo BASE_PATH; ?>index.php#giang-vien">Giảng Viên</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link nav-link-custom" href="<?php echo BASE_PATH; ?>index.php#sinh-vien">Sinh
-                                Viên</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link nav-link-custom" href="#">Cổng Thông Tin</a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link nav-link-custom" href="#">Liên Hệ Và Phản Hồi</a>
                         </li>
                     </ul>

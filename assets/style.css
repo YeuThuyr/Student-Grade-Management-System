@@ -183,22 +183,7 @@ body {
 }
 
 /* ==================================
- * 2. TEACHER CARDS
- * ================================== */
-.teacher-card { transition: all 0.3s ease; border: none; }
-.teacher-card:hover { transform: translateY(-5px); box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12) !important; }
-.teacher-card:hover .tc-btn { background-color: var(--hust-red) !important; color: white !important; }
-
-/* ==================================
- * 3. STUDENT CARDS
- * ================================== */
-.student-card { transition: all 0.3s ease; border: 1px solid #eaeaea; cursor: pointer; }
-.student-card:hover { box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08) !important; border-color: #fce4e4; transform: translateX(5px); }
-.sc-icon { width: 50px; height: 50px; border-radius: 50%; background-color: #fdf2f2; color: var(--hust-red); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; transition: all 0.3s ease; }
-.student-card:hover .sc-icon { background-color: var(--hust-red); color: white; }
-
-/* ==================================
- * 4. MOBILE APP SECTION & FOOTER
+ * 2. MOBILE APP SECTION & FOOTER
  * ================================== */
 .app-section {
     background: #EAECEF url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><path d="M0 100 L 20 60 L 40 80 L 60 40 L 80 70 L 100 20 L 100 100 Z" fill="rgba(200,200,200,0.1)"/></svg>') bottom/contain no-repeat;
