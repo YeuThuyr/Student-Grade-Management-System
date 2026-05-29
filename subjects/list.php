@@ -41,21 +41,21 @@ require_once __DIR__ . '/../includes/header.php';
 <div class="container py-5 mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold">Quản lý môn học</h2>
-            <p class="text-muted">Thêm, sửa và xóa thông tin môn học.</p>
+            <h2 class="fw-bold" data-i18n="subj_list_title">Quản lý môn học</h2>
+            <p class="text-muted" data-i18n="subj_list_desc">Thêm, sửa và xóa thông tin môn học.</p>
         </div>
-        <a href="<?php echo BASE_PATH; ?>subjects/add.php" class="btn btn-hust">Thêm môn học</a>
+        <a href="<?php echo BASE_PATH; ?>subjects/add.php" class="btn btn-hust" data-i18n="subj_add_btn">Thêm môn học</a>
     </div>
 
     <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
         <form method="GET" class="row g-3 align-items-end">
             <div class="col-md-8">
-                <label class="form-label">Tìm kiếm</label>
+                <label class="form-label" data-i18n="common_search">Tìm kiếm</label>
                 <input type="text" name="search" class="form-control" value="<?php echo e($search); ?>"
-                    placeholder="Mã môn học hoặc tên môn">
+                    placeholder="Mã môn học hoặc tên môn" data-i18n-placeholder="subj_search_ph">
             </div>
             <div class="col-md-4">
-                <button class="btn btn-outline-primary w-100">Tìm kiếm</button>
+                <button class="btn btn-outline-primary w-100" data-i18n="common_search">Tìm kiếm</button>
             </div>
         </form>
     </div>
@@ -66,17 +66,17 @@ require_once __DIR__ . '/../includes/header.php';
                 <thead class="table-light">
                     <tr>
                         <th>#</th>
-                        <th>Mã môn học</th>
-                        <th>Tên môn học</th>
-                        <th>Tín chỉ</th>
-                        <th>Miêu tả</th>
-                        <th>Hành động</th>
+                        <th data-i18n="subj_th_code">Mã môn học</th>
+                        <th data-i18n="subj_th_name">Tên môn học</th>
+                        <th data-i18n="th_credits">Tín chỉ</th>
+                        <th data-i18n="subj_th_desc">Miêu tả</th>
+                        <th data-i18n="common_actions">Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($subjects)): ?>
                         <tr>
-                            <td colspan="6" class="text-center text-muted py-4">Không tìm thấy môn học.</td>
+                            <td colspan="6" class="text-center text-muted py-4" data-i18n="subj_no_results">Không tìm thấy môn học.</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($subjects as $index => $subject): ?>
@@ -88,10 +88,10 @@ require_once __DIR__ . '/../includes/header.php';
                                 <td><?php echo e($subject['description']); ?></td>
                                 <td>
                                     <a href="<?php echo BASE_PATH; ?>subjects/edit.php?id=<?php echo e($subject['id']); ?>"
-                                        class="btn btn-sm btn-outline-primary me-2">Sửa</a>
+                                        class="btn btn-sm btn-outline-primary me-2" data-i18n="common_edit">Sửa</a>
                                     <a href="<?php echo BASE_PATH; ?>subjects/delete.php?id=<?php echo e($subject['id']); ?>"
                                         class="btn btn-sm btn-outline-danger"
-                                        onclick="return confirm('Bạn có chắc muốn xóa môn học này?');">Xóa</a>
+                                        onclick="return confirm('Bạn có chắc muốn xóa môn học này?');" data-i18n="common_delete">Xóa</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

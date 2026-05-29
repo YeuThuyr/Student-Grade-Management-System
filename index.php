@@ -20,7 +20,7 @@ $academicYears = $yearStmt->fetchAll();
 
 if ($searched) {
     if ($studentCode !== '' && !preg_match('/^[0-9]{1,8}$/', $studentCode)) {
-        $error = 'Mã sinh viên chỉ được nhập số và tối đa 8 chữ số.';
+        $error = __('err_numeric_code');
     } else {
         $where = ['s.is_active = 1'];
         $params = [];
@@ -98,22 +98,22 @@ require_once __DIR__ . '/includes/header.php';
                 <div class="col-12 col-lg-10">
                     <div class="card border-0 shadow rounded-4 p-4 p-md-5 homepage-search-card">
                         <div class="text-center mb-4">
-                            <h1 class="fw-bold mb-2">Tra cứu điểm sinh viên</h1>
-                            <p class="text-muted mb-0">Nhập một phần mã sinh viên và lọc theo năm học để xem bảng điểm.</p>
+                            <h1 class="fw-bold mb-2" data-i18n="search_title"><?php echo __('search_title'); ?></h1>
+                            <p class="text-muted mb-0" data-i18n="search_subtitle"><?php echo __('search_subtitle'); ?></p>
                         </div>
 
                         <form method="GET" action="index.php" class="row g-3 align-items-end">
                             <div class="col-12 col-md-5">
-                                <label for="student_code" class="form-label fw-semibold">Mã sinh viên</label>
+                                <label for="student_code" class="form-label fw-semibold" data-i18n="label_student_code"><?php echo __('label_student_code'); ?></label>
                                 <input type="text" class="form-control form-control-lg" id="student_code"
-                                    name="student_code" value="<?php echo e($studentCode); ?>" placeholder="Ví dụ: 2023"
-                                    maxlength="8" inputmode="numeric" pattern="[0-9]{1,8}">
+                                    name="student_code" value="<?php echo e($studentCode); ?>" placeholder="<?php echo e(__('placeholder_student_code')); ?>"
+                                    maxlength="8" inputmode="numeric" pattern="[0-9]{1,8}" data-i18n-placeholder="placeholder_student_code">
                             </div>
 
                             <div class="col-12 col-md-4">
-                                <label for="academic_year" class="form-label fw-semibold">Năm học</label>
+                                <label for="academic_year" class="form-label fw-semibold" data-i18n="label_academic_year"><?php echo __('label_academic_year'); ?></label>
                                 <select class="form-select form-select-lg" id="academic_year" name="academic_year">
-                                    <option value="">Tất cả năm học</option>
+                                    <option value="" data-i18n="option_all_years"><?php echo __('option_all_years'); ?></option>
                                     <?php foreach ($academicYears as $year): ?>
                                         <option value="<?php echo e($year['academic_year']); ?>" <?php echo $academicYear === $year['academic_year'] ? 'selected' : ''; ?>>
                                             <?php echo e($year['academic_year']); ?>
@@ -124,7 +124,7 @@ require_once __DIR__ . '/includes/header.php';
 
                             <div class="col-12 col-md-3">
                                 <button type="submit" class="btn btn-hust btn-lg w-100">
-                                    <i class="fas fa-search me-1"></i> Tra cứu
+                                    <i class="fas fa-search me-1"></i> <span data-i18n="btn_search"><?php echo __('btn_search'); ?></span>
                                 </button>
                             </div>
                         </form>
@@ -140,16 +140,16 @@ require_once __DIR__ . '/includes/header.php';
                 <?php if (empty($students)): ?>
                     <div class="row justify-content-center">
                         <div class="col-12 col-lg-10">
-                            <div class="alert alert-warning shadow-sm mb-0">
-                                Không tìm thấy sinh viên phù hợp với điều kiện tra cứu.
+                            <div class="alert alert-warning shadow-sm mb-0" data-i18n="no_results">
+                                <?php echo __('no_results'); ?>
                             </div>
                         </div>
                     </div>
                 <?php else: ?>
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h2 class="h4 fw-bold mb-0">Kết quả tra cứu</h2>
+                        <h2 class="h4 fw-bold mb-0" data-i18n="results_title"><?php echo __('results_title'); ?></h2>
                         <span class="badge bg-danger-subtle text-danger fs-6 px-3 py-2">
-                            <?php echo count($students); ?> sinh viên
+                            <?php echo count($students); ?> <span data-i18n="unit_students"><?php echo __('unit_students'); ?></span>
                         </span>
                     </div>
 
@@ -183,21 +183,21 @@ require_once __DIR__ . '/includes/header.php';
                                     <thead class="table-light">
                                         <tr>
                                             <th>#</th>
-                                            <th>Môn học</th>
-                                            <th>Tín chỉ</th>
-                                            <th>HK</th>
-                                            <th>Năm học</th>
-                                            <th>Giữa kỳ</th>
-                                            <th>Cuối kỳ</th>
-                                            <th>Khác</th>
-                                            <th>TB</th>
-                                            <th>Điểm chữ</th>
+                                            <th data-i18n="th_subject"><?php echo __('th_subject'); ?></th>
+                                            <th data-i18n="th_credits"><?php echo __('th_credits'); ?></th>
+                                            <th data-i18n="th_semester"><?php echo __('th_semester'); ?></th>
+                                            <th data-i18n="th_year"><?php echo __('th_year'); ?></th>
+                                            <th data-i18n="th_midterm"><?php echo __('th_midterm'); ?></th>
+                                            <th data-i18n="th_final"><?php echo __('th_final'); ?></th>
+                                            <th data-i18n="th_other"><?php echo __('th_other'); ?></th>
+                                            <th data-i18n="th_average"><?php echo __('th_average'); ?></th>
+                                            <th data-i18n="th_letter"><?php echo __('th_letter'); ?></th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <?php if (empty($grades)): ?>
                                             <tr>
-                                                <td colspan="10" class="text-center text-muted py-4">Sinh viên này chưa có điểm.</td>
+                                                <td colspan="10" class="text-center text-muted py-4" data-i18n="no_grades"><?php echo __('no_grades'); ?></td>
                                             </tr>
                                         <?php else: ?>
                                             <?php foreach ($grades as $index => $grade): ?>
@@ -236,8 +236,8 @@ require_once __DIR__ . '/includes/header.php';
                                  style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--hust-red), var(--hust-dark-red)); box-shadow: 0 8px 24px rgba(200, 16, 46, 0.3);">
                                 <i class="fas fa-graduation-cap fa-2x text-white"></i>
                             </div>
-                            <h1 class="fw-bold mb-2">Chào mừng đến với Hệ Thống Quản Trị Đại Học</h1>
-                            <p class="text-muted mb-0 fs-5">Đại Học Bách Khoa Hà Nội — Hệ thống tra cứu và quản lý điểm sinh viên trực tuyến</p>
+                            <h1 class="fw-bold mb-2" data-i18n="welcome_title"><?php echo __('welcome_title'); ?></h1>
+                            <p class="text-muted mb-0 fs-5" data-i18n="welcome_subtitle"><?php echo __('welcome_subtitle'); ?></p>
                         </div>
 
                         <hr class="my-4">
@@ -249,8 +249,8 @@ require_once __DIR__ . '/includes/header.php';
                                          style="width: 56px; height: 56px; background: rgba(200, 16, 46, 0.1);">
                                         <i class="fas fa-search fa-lg" style="color: var(--hust-red);"></i>
                                     </div>
-                                    <h5 class="fw-bold mb-2">Tra Cứu Điểm</h5>
-                                    <p class="text-muted mb-0 small">Xem bảng điểm chi tiết theo từng môn học, học kỳ và năm học một cách nhanh chóng.</p>
+                                    <h5 class="fw-bold mb-2" data-i18n="feature_search_title"><?php echo __('feature_search_title'); ?></h5>
+                                    <p class="text-muted mb-0 small" data-i18n="feature_search_desc"><?php echo __('feature_search_desc'); ?></p>
                                 </div>
                             </div>
                             <div class="col-12 col-md-4">
@@ -259,8 +259,8 @@ require_once __DIR__ . '/includes/header.php';
                                          style="width: 56px; height: 56px; background: rgba(59, 130, 246, 0.1);">
                                         <i class="fas fa-chart-line fa-lg" style="color: #3b82f6;"></i>
                                     </div>
-                                    <h5 class="fw-bold mb-2">Thống Kê Học Tập</h5>
-                                    <p class="text-muted mb-0 small">Theo dõi GPA, phân tích kết quả học tập và tiến độ qua các học kỳ.</p>
+                                    <h5 class="fw-bold mb-2" data-i18n="feature_stats_title"><?php echo __('feature_stats_title'); ?></h5>
+                                    <p class="text-muted mb-0 small" data-i18n="feature_stats_desc"><?php echo __('feature_stats_desc'); ?></p>
                                 </div>
                             </div>
                             <div class="col-12 col-md-4">
@@ -269,18 +269,18 @@ require_once __DIR__ . '/includes/header.php';
                                          style="width: 56px; height: 56px; background: rgba(34, 197, 94, 0.1);">
                                         <i class="fas fa-user-shield fa-lg" style="color: #22c55e;"></i>
                                     </div>
-                                    <h5 class="fw-bold mb-2">Quản Lý Tài Khoản</h5>
-                                    <p class="text-muted mb-0 small">Quản lý hồ sơ cá nhân, cập nhật thông tin và bảo mật tài khoản.</p>
+                                    <h5 class="fw-bold mb-2" data-i18n="feature_account_title"><?php echo __('feature_account_title'); ?></h5>
+                                    <p class="text-muted mb-0 small" data-i18n="feature_account_desc"><?php echo __('feature_account_desc'); ?></p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="pt-2">
                             <a href="<?php echo BASE_PATH; ?>auth/login.php" class="btn btn-hust btn-lg px-5 py-3 rounded-pill shadow-sm" style="font-size: 1rem;">
-                                <i class="fas fa-sign-in-alt me-2"></i> Đăng nhập để tiếp tục
+                                <i class="fas fa-sign-in-alt me-2"></i> <span data-i18n="login_cta"><?php echo __('login_cta'); ?></span>
                             </a>
                             <p class="text-muted mt-3 mb-0 small">
-                                <i class="fas fa-lock me-1"></i> Vui lòng đăng nhập bằng tài khoản sinh viên hoặc quản trị viên để sử dụng hệ thống.
+                                <i class="fas fa-lock me-1"></i> <span data-i18n="login_note"><?php echo __('login_note'); ?></span>
                             </p>
                         </div>
                     </div>

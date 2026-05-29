@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = trim($_POST['password'] ?? '');
 
     if ($username === '' || $password === '') {
-        $error = "Vui lòng nhập đầy đủ thông tin.";
+        $error = __('login_err_empty');
     } else {
         $stmt = $pdo->prepare(
             "SELECT u.id, u.username, u.password, u.role, u.student_id, u.is_active, s.student_code
@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit();
         }
 
-        $error = "Tài khoản hoặc mật khẩu không chính xác.";
+        $error = __('login_err_failed');
     }
 }
 
@@ -58,8 +58,8 @@ require_once '../includes/header.php';
             <div class="card shadow-lg border-0 rounded-4" style="background: #ffffff;">
                 <div class="card-body p-5">
                     <div class="text-center mb-4">
-                        <h2 class="fw-bold hust-text-gradient mb-2">Đăng Nhập Hệ Thống</h2>
-                        <p class="text-muted fs-6">Vui lòng nhập thông tin để truy cập</p>
+                        <h2 class="fw-bold hust-text-gradient mb-2" data-i18n="login_title"><?php echo __('login_title'); ?></h2>
+                        <p class="text-muted fs-6" data-i18n="login_subtitle"><?php echo __('login_subtitle'); ?></p>
                     </div>
 
                     <?php if (isset($error)): ?>
@@ -71,19 +71,19 @@ require_once '../includes/header.php';
 
                     <form method="POST" action="">
                         <div class="mb-3">
-                            <label for="username" class="form-label fw-semibold text-secondary">Tên đăng nhập</label>
+                            <label for="username" class="form-label fw-semibold text-secondary" data-i18n="login_username"><?php echo __('login_username'); ?></label>
                             <input type="text" class="form-control form-control-lg bg-light" id="username"
-                                name="username" placeholder="Tên đăng nhập" required>
+                                name="username" placeholder="<?php echo e(__('login_username')); ?>" required data-i18n-placeholder="login_username">
                         </div>
 
                         <div class="mb-4">
-                            <label for="password" class="form-label fw-semibold text-secondary">Mật khẩu</label>
+                            <label for="password" class="form-label fw-semibold text-secondary" data-i18n="login_password"><?php echo __('login_password'); ?></label>
                             <input type="password" class="form-control form-control-lg bg-light" id="password"
                                 name="password" placeholder="••••••••" required>
                         </div>
 
                         <div class="d-grid mb-4">
-                            <button type="submit" class="btn btn-hust btn-lg fw-bold w-100">Đăng Nhập</button>
+                            <button type="submit" class="btn btn-hust btn-lg fw-bold w-100" data-i18n="login_submit"><?php echo __('login_submit'); ?></button>
                         </div>
                     </form>
                 </div>

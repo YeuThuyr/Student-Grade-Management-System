@@ -88,9 +88,9 @@ require_once __DIR__ . '/includes/header.php';
 
 <div class="container py-5 mt-4">
     <div class="d-flex justify-content-between align-items-center mb-5">
-        <h2 class="fw-bold text-dark"><i class="fas fa-chart-line me-2 text-danger"></i>Dashboard Thống Kê</h2>
+        <h2 class="fw-bold text-dark"><i class="fas fa-chart-line me-2 text-danger"></i><span data-i18n="dash_title">Dashboard Thống Kê</span></h2>
         <a href="index.php" class="btn btn-outline-secondary rounded-pill px-4">
-            <i class="fas fa-arrow-left me-2"></i>Quay lại
+            <i class="fas fa-arrow-left me-2"></i><span data-i18n="dash_back">Quay lại</span>
         </a>
     </div>
 
@@ -99,26 +99,26 @@ require_once __DIR__ . '/includes/header.php';
         <div class="col-12 col-md-4">
             <div class="card border-0 shadow-sm rounded-4 p-4 text-center h-100 bg-white">
                 <div class="display-5 fw-bold text-primary mb-2"><?php echo $summary['total_students']; ?></div>
-                <div class="text-muted text-uppercase tracking-wider small fw-bold">Tổng số sinh viên</div>
+                <div class="text-muted text-uppercase tracking-wider small fw-bold" data-i18n="dash_total_students">Tổng số sinh viên</div>
             </div>
         </div>
         <div class="col-12 col-md-4">
             <div class="card border-0 shadow-sm rounded-4 p-4 text-center h-100 bg-white">
                 <div class="display-5 fw-bold text-success mb-2"><?php echo $summary['average_gpa']; ?></div>
-                <div class="text-muted text-uppercase tracking-wider small fw-bold">GPA Trung Bình</div>
+                <div class="text-muted text-uppercase tracking-wider small fw-bold" data-i18n="dash_avg_gpa">GPA Trung Bình</div>
             </div>
         </div>
         <div class="col-12 col-md-4">
             <div class="card border-0 shadow-sm rounded-4 p-4 text-center h-100 bg-white">
                 <div class="display-5 fw-bold text-danger mb-2"><?php echo $summary['pass_rate']; ?>%</div>
-                <div class="text-muted text-uppercase tracking-wider small fw-bold">Tỷ lệ Đạt</div>
+                <div class="text-muted text-uppercase tracking-wider small fw-bold" data-i18n="dash_pass_rate">Tỷ lệ Đạt</div>
             </div>
         </div>
     </div>
 
     <!-- Search Section -->
     <div class="card border-0 shadow-sm rounded-4 p-4 mb-5 bg-white search-section">
-        <h5 class="fw-bold mb-3 text-dark"><i class="fas fa-search me-2 text-danger"></i>Tìm kiếm Sinh viên theo Mã số
+        <h5 class="fw-bold mb-3 text-dark"><i class="fas fa-search me-2 text-danger"></i><span data-i18n="dash_search_title">Tìm kiếm Sinh viên theo Mã số</span>
         </h5>
         <form method="GET" action="dashboard.php" class="search-form" id="searchForm">
             <div class="input-group search-input-group">
@@ -129,7 +129,7 @@ require_once __DIR__ . '/includes/header.php';
                     placeholder="Nhập mã sinh viên (VD: 2023, 20239614...)"
                     value="<?php echo htmlspecialchars($search_code); ?>" maxlength="20" autocomplete="off">
                 <button type="submit" class="btn search-btn" id="searchBtn">
-                    <i class="fas fa-search me-1"></i> Tìm kiếm
+                    <i class="fas fa-search me-1"></i> <span data-i18n="dash_search_btn">Tìm kiếm</span>
                 </button>
                 <?php if ($search_performed): ?>
                     <a href="dashboard.php" class="btn search-clear-btn" title="Xóa tìm kiếm">
@@ -141,10 +141,10 @@ require_once __DIR__ . '/includes/header.php';
             <!-- Filters row -->
             <div class="row g-3 mt-2 user-select-none">
                 <div class="col-12 col-md-4">
-                    <label class="form-label text-muted small fw-bold mb-1">Năm học</label>
+                    <label class="form-label text-muted small fw-bold mb-1" data-i18n="dash_filter_year">Năm học</label>
                     <select name="academic_year" class="form-select filter-select"
                         onchange="document.getElementById('searchForm').submit()">
-                        <option value="">Tất cả các năm</option>
+                        <option value="" data-i18n="dash_all_years">Tất cả các năm</option>
                         <?php foreach ($years as $year): ?>
                             <option value="<?php echo htmlspecialchars($year); ?>" <?php if ($f_year === $year)
                                    echo 'selected'; ?>>Năm học <?php echo htmlspecialchars($year); ?></option>
@@ -152,21 +152,21 @@ require_once __DIR__ . '/includes/header.php';
                     </select>
                 </div>
                 <div class="col-12 col-md-4">
-                    <label class="form-label text-muted small fw-bold mb-1">Giới tính</label>
+                    <label class="form-label text-muted small fw-bold mb-1" data-i18n="dash_filter_gender">Giới tính</label>
                     <select name="gender" class="form-select filter-select"
                         onchange="document.getElementById('searchForm').submit()">
-                        <option value="">Tất cả</option>
+                        <option value="" data-i18n="dash_all">Tất cả</option>
                         <option value="Male" <?php if ($f_gender === 'Male')
-                            echo 'selected'; ?>>Nam</option>
+                            echo 'selected'; ?> data-i18n="dash_male">Nam</option>
                         <option value="Female" <?php if ($f_gender === 'Female')
-                            echo 'selected'; ?>>Nữ</option>
+                            echo 'selected'; ?> data-i18n="dash_female">Nữ</option>
                     </select>
                 </div>
                 <div class="col-12 col-md-4">
-                    <label class="form-label text-muted small fw-bold mb-1">Xếp loại GPA</label>
+                    <label class="form-label text-muted small fw-bold mb-1" data-i18n="dash_filter_gpa">Xếp loại GPA</label>
                     <select name="gpa_range" class="form-select filter-select"
                         onchange="document.getElementById('searchForm').submit()">
-                        <option value="">Tất cả mức điểm</option>
+                        <option value="" data-i18n="dash_all_gpa">Tất cả mức điểm</option>
                         <option value="excellent" <?php if ($f_gpa === 'excellent')
                             echo 'selected'; ?>>Xuất sắc (≥ 8.0)
                         </option>
@@ -277,7 +277,7 @@ require_once __DIR__ . '/includes/header.php';
         <!-- Pass/Fail Chart -->
         <div class="col-12 col-lg-5">
             <div class="card border-0 shadow-sm rounded-4 p-4 h-100 bg-white">
-                <h5 class="fw-bold mb-4 text-dark text-center">Tỷ lệ Đạt / Trượt</h5>
+                <h5 class="fw-bold mb-4 text-dark text-center" data-i18n="dash_pass_fail_chart">Tỷ lệ Đạt / Trượt</h5>
                 <div style="height: 300px;">
                     <canvas id="passFailChart"></canvas>
                 </div>
@@ -286,7 +286,7 @@ require_once __DIR__ . '/includes/header.php';
         <!-- Grade Distribution Chart -->
         <div class="col-12 col-lg-7">
             <div class="card border-0 shadow-sm rounded-4 p-4 h-100 bg-white">
-                <h5 class="fw-bold mb-4 text-dark text-center">Phân bố điểm chữ</h5>
+                <h5 class="fw-bold mb-4 text-dark text-center" data-i18n="dash_grade_dist_chart">Phân bố điểm chữ</h5>
                 <div style="height: 300px;">
                     <canvas id="gradeDistChart"></canvas>
                 </div>

@@ -63,35 +63,35 @@ require_once __DIR__ . '/../includes/header.php';
 <div class="container py-5 mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
-            <h2 class="fw-bold">Quản lý sinh viên</h2>
-            <p class="text-muted mb-0">Thêm, sửa, tìm kiếm và hiển thị danh sách sinh viên.</p>
+            <h2 class="fw-bold" data-i18n="stu_list_title">Quản lý sinh viên</h2>
+            <p class="text-muted mb-0" data-i18n="stu_list_desc">Thêm, sửa, tìm kiếm và hiển thị danh sách sinh viên.</p>
         </div>
         <div>
             <a href="<?php echo BASE_PATH; ?>students/optimal_search.php" class="btn btn-outline-primary me-2">
-                <i class="fa fa-bolt me-1"></i> Tìm kiếm Tối ưu & Benchmarks
+                <i class="fa fa-bolt me-1"></i> <span data-i18n="stu_optimal_search">Tìm kiếm Tối ưu & Benchmarks</span>
             </a>
-            <a href="<?php echo BASE_PATH; ?>students/add.php" class="btn btn-hust">Thêm sinh viên</a>
+            <a href="<?php echo BASE_PATH; ?>students/add.php" class="btn btn-hust" data-i18n="stu_add_btn">Thêm sinh viên</a>
         </div>
     </div>
 
     <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
         <form method="GET" class="row g-3 align-items-end">
             <div class="col-md-5">
-                <label class="form-label">Tìm kiếm</label>
+                <label class="form-label" data-i18n="common_search">Tìm kiếm</label>
                 <input type="text" name="search" class="form-control" value="<?php echo e($search); ?>"
                     placeholder="Mã sinh viên, tên hoặc email">
             </div>
             <div class="col-md-4">
-                <label class="form-label">Lớp</label>
+                <label class="form-label" data-i18n="common_class">Lớp</label>
                 <select name="class_id" class="form-select">
-                    <option value="">Tất cả lớp</option>
+                    <option value="" data-i18n="stu_all_classes">Tất cả lớp</option>
                     <?php foreach ($classes as $class): ?>
                         <option value="<?php echo e($class['id']); ?>" <?php echo $classFilter == $class['id'] ? 'selected' : ''; ?>><?php echo e($class['class_name']); ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
             <div class="col-md-3">
-                <button type="submit" class="btn btn-outline-primary w-100">Lọc</button>
+                <button type="submit" class="btn btn-outline-primary w-100" data-i18n="common_filter">Lọc</button>
             </div>
         </form>
     </div>
@@ -102,19 +102,19 @@ require_once __DIR__ . '/../includes/header.php';
                 <thead class="table-light">
                     <tr>
                         <th class="px-4 py-3 text-muted fw-semibold">#</th>
-                        <th class="px-4 py-3 text-muted fw-semibold">Mã SV</th>
-                        <th class="px-4 py-3 text-muted fw-semibold">Họ và tên</th>
-                        <th class="px-4 py-3 text-muted fw-semibold">Lớp</th>
-                        <th class="px-4 py-3 text-muted fw-semibold">Email</th>
-                        <th class="px-4 py-3 text-muted fw-semibold">GPA</th>
-                        <th class="px-4 py-3 text-muted fw-semibold">Ngày đăng ký</th>
-                        <th class="px-4 py-3 text-muted fw-semibold text-end">Hành động</th>
+                        <th class="px-4 py-3 text-muted fw-semibold" data-i18n="stu_th_code">Mã SV</th>
+                        <th class="px-4 py-3 text-muted fw-semibold" data-i18n="stu_th_name">Họ và tên</th>
+                        <th class="px-4 py-3 text-muted fw-semibold" data-i18n="common_class">Lớp</th>
+                        <th class="px-4 py-3 text-muted fw-semibold" data-i18n="stu_th_email">Email</th>
+                        <th class="px-4 py-3 text-muted fw-semibold" data-i18n="stu_th_gpa">GPA</th>
+                        <th class="px-4 py-3 text-muted fw-semibold" data-i18n="stu_th_reg_date">Ngày đăng ký</th>
+                        <th class="px-4 py-3 text-muted fw-semibold text-end" data-i18n="common_actions">Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($students)): ?>
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-5">Không tìm thấy sinh viên nào.</td>
+                            <td colspan="8" class="text-center text-muted py-5" data-i18n="stu_no_results">Không tìm thấy sinh viên nào.</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($students as $index => $student): ?>
@@ -134,10 +134,10 @@ require_once __DIR__ . '/../includes/header.php';
                                 <td class="px-4 py-3 text-muted"><?php echo e(date('d/m/Y', strtotime($student['created_at']))); ?></td>
                                 <td class="px-4 py-3 text-end">
                                     <a href="<?php echo BASE_PATH; ?>students/edit.php?id=<?php echo e($student['id']); ?>"
-                                        class="btn btn-sm btn-outline-primary rounded-pill px-3 me-1">Sửa</a>
+                                        class="btn btn-sm btn-outline-primary rounded-pill px-3 me-1" data-i18n="common_edit">Sửa</a>
                                     <a href="<?php echo BASE_PATH; ?>students/delete.php?id=<?php echo e($student['id']); ?>"
                                         class="btn btn-sm btn-outline-danger rounded-pill px-3"
-                                        onclick="return confirm('Bạn có chắc muốn vô hiệu sinh viên này?');">Vô hiệu</a>
+                                        onclick="return confirm('Bạn có chắc muốn vô hiệu sinh viên này?');" data-i18n="stu_deactivate">Vô hiệu</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

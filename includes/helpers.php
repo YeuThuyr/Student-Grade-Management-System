@@ -3,6 +3,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+require_once __DIR__ . '/languages.php';
+
 function e($value)
 {
     return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
@@ -55,17 +57,17 @@ function gradePoint($letter)
 function gpaStatusLabel($gpa)
 {
     if ($gpa >= 8.0)
-        return 'Xuất sắc';
+        return __('gpa_excellent');
     if ($gpa >= 6.5)
-        return 'Khá';
+        return __('gpa_good');
     if ($gpa >= 5.0)
-        return 'Trung bình';
-    return 'Yếu';
+        return __('gpa_average');
+    return __('gpa_weak');
 }
 
 function gpaPassFail($gpa)
 {
-    return $gpa >= 5.0 ? 'Đạt' : 'Trượt';
+    return $gpa >= 5.0 ? __('gpa_pass') : __('gpa_fail');
 }
 
 function redirect($url)

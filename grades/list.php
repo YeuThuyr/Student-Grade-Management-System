@@ -70,11 +70,11 @@ require_once __DIR__ . '/../includes/header.php';
 <div class="container py-5 mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold">Danh sách điểm</h2>
-            <p class="text-muted">Xem và lọc điểm theo môn, học kỳ và năm học.</p>
+            <h2 class="fw-bold" data-i18n="grade_list_title">Danh sách điểm</h2>
+            <p class="text-muted" data-i18n="grade_list_desc">Xem và lọc điểm theo môn, học kỳ và năm học.</p>
         </div>
         <?php if ($role === 'admin'): ?>
-            <a href="<?php echo BASE_PATH; ?>grades/manage.php" class="btn btn-hust">Thêm/Chỉnh sửa điểm</a>
+            <a href="<?php echo BASE_PATH; ?>grades/manage.php" class="btn btn-hust" data-i18n="grade_add_edit">Thêm/Chỉnh sửa điểm</a>
         <?php endif; ?>
     </div>
 
@@ -82,13 +82,13 @@ require_once __DIR__ . '/../includes/header.php';
         <form method="GET" class="row g-3 align-items-end">
             <?php if ($role === 'admin'): ?>
                 <div class="col-md-4">
-                    <label class="form-label">Tìm sinh viên</label>
+                    <label class="form-label" data-i18n="grade_search_student">Tìm sinh viên</label>
                     <input type="text" name="search" class="form-control" value="<?php echo e($search); ?>"
                         placeholder="Mã SV hoặc tên">
                 </div>
             <?php endif; ?>
             <div class="col-md-2">
-                <label class="form-label">Môn học</label>
+                <label class="form-label" data-i18n="nav_subjects">Môn học</label>
                 <select name="subject_id" class="form-select">
                     <option value="">Tất cả</option>
                     <?php foreach ($subjects as $subject): ?>
@@ -97,7 +97,7 @@ require_once __DIR__ . '/../includes/header.php';
                 </select>
             </div>
             <div class="col-md-2">
-                <label class="form-label">Học kỳ</label>
+                <label class="form-label" data-i18n="grade_semester">Học kỳ</label>
                 <select name="semester" class="form-select">
                     <option value="">Tất cả</option>
                     <?php foreach ($semesters as $row): ?>
@@ -106,7 +106,7 @@ require_once __DIR__ . '/../includes/header.php';
                 </select>
             </div>
             <div class="col-md-2">
-                <label class="form-label">Năm học</label>
+                <label class="form-label" data-i18n="label_academic_year">Năm học</label>
                 <select name="academic_year" class="form-select">
                     <option value="">Tất cả</option>
                     <?php foreach ($years as $row): ?>
@@ -116,7 +116,7 @@ require_once __DIR__ . '/../includes/header.php';
                 </select>
             </div>
             <div class="col-md-2 text-end">
-                <button class="btn btn-outline-primary w-100">Lọc</button>
+                <button class="btn btn-outline-primary w-100" data-i18n="common_filter">Lọc</button>
             </div>
         </form>
     </div>
@@ -127,24 +127,24 @@ require_once __DIR__ . '/../includes/header.php';
                 <thead class="table-light">
                     <tr>
                         <th>#</th>
-                        <th>Sinh viên</th>
-                        <th>Môn học</th>
-                        <th>HK</th>
-                        <th>Năm học</th>
-                        <th>Giữa kỳ</th>
-                        <th>Cuối kỳ</th>
-                        <th>Khác</th>
-                        <th>TB</th>
-                        <th>Điểm chữ</th>
+                        <th data-i18n="grade_th_student">Sinh viên</th>
+                        <th data-i18n="th_subject">Môn học</th>
+                        <th data-i18n="th_semester">HK</th>
+                        <th data-i18n="th_year">Năm học</th>
+                        <th data-i18n="th_midterm">Giữa kỳ</th>
+                        <th data-i18n="th_final">Cuối kỳ</th>
+                        <th data-i18n="th_other">Khác</th>
+                        <th data-i18n="th_average">TB</th>
+                        <th data-i18n="th_letter">Điểm chữ</th>
                         <?php if ($role === 'admin'): ?>
-                            <th>Hành động</th>
+                            <th data-i18n="common_actions">Hành động</th>
                         <?php endif; ?>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($grades)): ?>
                         <tr>
-                            <td colspan="<?php echo $role === 'admin' ? 11 : 10; ?>" class="text-center text-muted py-4">
+                            <td colspan="<?php echo $role === 'admin' ? 11 : 10; ?>" class="text-center text-muted py-4" data-i18n="grade_no_results">
                                 Không có bản ghi điểm phù hợp.</td>
                         </tr>
                     <?php else: ?>
@@ -163,7 +163,7 @@ require_once __DIR__ . '/../includes/header.php';
                                 <?php if ($role === 'admin'): ?>
                                     <td>
                                         <a href="<?php echo BASE_PATH; ?>grades/manage.php?id=<?php echo e($grade['id']); ?>"
-                                            class="btn btn-sm btn-outline-primary">Sửa</a>
+                                            class="btn btn-sm btn-outline-primary" data-i18n="common_edit">Sửa</a>
                                     </td>
                                 <?php endif; ?>
                             </tr>
