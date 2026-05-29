@@ -61,12 +61,17 @@ require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="container py-5 mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
             <h2 class="fw-bold">Quản lý sinh viên</h2>
-            <p class="text-muted">Thêm, sửa, tìm kiếm và hiển thị danh sách sinh viên.</p>
+            <p class="text-muted mb-0">Thêm, sửa, tìm kiếm và hiển thị danh sách sinh viên.</p>
         </div>
-        <a href="<?php echo BASE_PATH; ?>students/add.php" class="btn btn-hust">Thêm sinh viên</a>
+        <div>
+            <a href="<?php echo BASE_PATH; ?>students/optimal_search.php" class="btn btn-outline-primary me-2">
+                <i class="fa fa-bolt me-1"></i> Tìm kiếm Tối ưu & Benchmarks
+            </a>
+            <a href="<?php echo BASE_PATH; ?>students/add.php" class="btn btn-hust">Thêm sinh viên</a>
+        </div>
     </div>
 
     <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
@@ -91,41 +96,47 @@ require_once __DIR__ . '/../includes/header.php';
         </form>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4 bg-white">
+    <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th>#</th>
-                        <th>Mã SV</th>
-                        <th>Họ và tên</th>
-                        <th>Lớp</th>
-                        <th>Email</th>
-                        <th>GPA</th>
-                        <th>Ngày đăng ký</th>
-                        <th>Hành động</th>
+                        <th class="px-4 py-3 text-muted fw-semibold">#</th>
+                        <th class="px-4 py-3 text-muted fw-semibold">Mã SV</th>
+                        <th class="px-4 py-3 text-muted fw-semibold">Họ và tên</th>
+                        <th class="px-4 py-3 text-muted fw-semibold">Lớp</th>
+                        <th class="px-4 py-3 text-muted fw-semibold">Email</th>
+                        <th class="px-4 py-3 text-muted fw-semibold">GPA</th>
+                        <th class="px-4 py-3 text-muted fw-semibold">Ngày đăng ký</th>
+                        <th class="px-4 py-3 text-muted fw-semibold text-end">Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($students)): ?>
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-4">Không tìm thấy sinh viên nào.</td>
+                            <td colspan="8" class="text-center text-muted py-5">Không tìm thấy sinh viên nào.</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($students as $index => $student): ?>
                             <tr>
-                                <td><?php echo e($offset + $index + 1); ?></td>
-                                <td><?php echo e($student['student_code']); ?></td>
-                                <td><?php echo e($student['full_name']); ?></td>
-                                <td><?php echo e($student['class_name'] ?? 'Chưa có'); ?></td>
-                                <td><?php echo e($student['email']); ?></td>
-                                <td><?php echo e($student['gpa'] !== null ? number_format($student['gpa'], 2) : '—'); ?></td>
-                                <td><?php echo e(date('d/m/Y', strtotime($student['created_at']))); ?></td>
-                                <td>
+                                <td class="px-4 py-3 text-muted"><?php echo e($offset + $index + 1); ?></td>
+                                <td class="px-4 py-3 fw-bold text-dark"><?php echo e($student['student_code']); ?></td>
+                                <td class="px-4 py-3 fw-semibold"><?php echo e($student['full_name']); ?></td>
+                                <td class="px-4 py-3">
+                                    <span class="badge bg-light text-dark border px-3 py-2 rounded-pill fw-medium">
+                                        <?php echo e($student['class_name'] ?? 'Chưa có'); ?>
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-muted"><?php echo e($student['email']); ?></td>
+                                <td class="px-4 py-3">
+                                    <strong class="text-success fs-6"><?php echo e($student['gpa'] !== null ? number_format($student['gpa'], 2) : '—'); ?></strong>
+                                </td>
+                                <td class="px-4 py-3 text-muted"><?php echo e(date('d/m/Y', strtotime($student['created_at']))); ?></td>
+                                <td class="px-4 py-3 text-end">
                                     <a href="<?php echo BASE_PATH; ?>students/edit.php?id=<?php echo e($student['id']); ?>"
-                                        class="btn btn-sm btn-outline-primary me-2">Sửa</a>
+                                        class="btn btn-sm btn-outline-primary rounded-pill px-3 me-1">Sửa</a>
                                     <a href="<?php echo BASE_PATH; ?>students/delete.php?id=<?php echo e($student['id']); ?>"
-                                        class="btn btn-sm btn-outline-danger"
+                                        class="btn btn-sm btn-outline-danger rounded-pill px-3"
                                         onclick="return confirm('Bạn có chắc muốn vô hiệu sinh viên này?');">Vô hiệu</a>
                                 </td>
                             </tr>
@@ -136,15 +147,76 @@ require_once __DIR__ . '/../includes/header.php';
         </div>
     </div>
 
-    <?php if ($totalPages > 1): ?>
+    <?php
+    if ($totalPages > 1):
+        $range = 2; 
+        $startPage = max(1, $page - $range);
+        $endPage = min($totalPages, $page + $range);
+        
+        if ($page - 1 < $range) {
+            $endPage = min($totalPages, $startPage + ($range * 2));
+        }
+        if ($totalPages - $page < $range) {
+            $startPage = max(1, $endPage - ($range * 2));
+        }
+        
+        $pageLink = function($p) use ($search, $classFilter) {
+            return '?search=' . urlencode($search) . '&class_id=' . urlencode($classFilter) . '&page=' . $p;
+        };
+    ?>
         <nav class="mt-4" aria-label="Student pagination">
-            <ul class="pagination justify-content-center">
-                <?php for ($p = 1; $p <= $totalPages; $p++): ?>
+            <ul class="pagination justify-content-center align-items-center gap-1">
+                <!-- First Page -->
+                <?php if ($page > 1): ?>
+                    <li class="page-item">
+                        <a class="page-link rounded-circle border-0 shadow-sm d-flex align-items-center justify-content-center" 
+                           href="<?php echo $pageLink(1); ?>" title="Trang đầu" style="width: 40px; height: 40px; color: #555;">
+                            <i class="fa fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <!-- Previous Page -->
+                    <li class="page-item">
+                        <a class="page-link rounded-circle border-0 shadow-sm d-flex align-items-center justify-content-center" 
+                           href="<?php echo $pageLink($page - 1); ?>" title="Trang trước" style="width: 40px; height: 40px; color: #555;">
+                            <i class="fa fa-angle-left"></i>
+                        </a>
+                    </li>
+                <?php endif; ?>
+
+                <?php if ($startPage > 1): ?>
+                    <li class="page-item"><span class="page-link border-0 bg-transparent text-muted px-2">...</span></li>
+                <?php endif; ?>
+
+                <!-- Page numbers -->
+                <?php for ($p = $startPage; $p <= $endPage; $p++): ?>
                     <li class="page-item <?php echo $p === $page ? 'active' : ''; ?>">
-                        <a class="page-link"
-                            href="?search=<?php echo urlencode($search); ?>&class_id=<?php echo urlencode($classFilter); ?>&page=<?php echo $p; ?>"><?php echo $p; ?></a>
+                        <a class="page-link rounded-circle border-0 shadow-sm d-flex align-items-center justify-content-center fw-bold" 
+                           href="<?php echo $pageLink($p); ?>" style="width: 40px; height: 40px; <?php echo $p === $page ? 'background-color: var(--hust-red); color: white;' : 'color: #555;'; ?>">
+                            <?php echo $p; ?>
+                        </a>
                     </li>
                 <?php endfor; ?>
+
+                <?php if ($endPage < $totalPages): ?>
+                    <li class="page-item"><span class="page-link border-0 bg-transparent text-muted px-2">...</span></li>
+                <?php endif; ?>
+
+                <!-- Next Page -->
+                <?php if ($page < $totalPages): ?>
+                    <li class="page-item">
+                        <a class="page-link rounded-circle border-0 shadow-sm d-flex align-items-center justify-content-center" 
+                           href="<?php echo $pageLink($page + 1); ?>" title="Trang sau" style="width: 40px; height: 40px; color: #555;">
+                            <i class="fa fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <!-- Last Page -->
+                    <li class="page-item">
+                        <a class="page-link rounded-circle border-0 shadow-sm d-flex align-items-center justify-content-center" 
+                           href="<?php echo $pageLink($totalPages); ?>" title="Trang cuối" style="width: 40px; height: 40px; color: #555;">
+                            <i class="fa fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                <?php endif; ?>
             </ul>
         </nav>
     <?php endif; ?>
