@@ -23,15 +23,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($username === '' || $password === '') {
         $error = __('login_err_empty');
+    } elseif (!preg_match('/^[a-zA-Z0-9_\-]+$/', $username)) {
+        // Prevent 500 error / collation mismatch with Vietnamese text or special characters
+        // Usernames are only admin or numeric student codes anyway, so anything else is invalid
+        $error = __('login_err_failed');
     } else {
-        $stmt = $pdo->prepare(
-            "SELECT u.id, u.username, u.password, u.role, u.student_id, u.is_active, s.student_code
-             FROM users u
-             LEFT JOIN students s ON u.student_id = s.id
-             WHERE u.username = ?"
-        );
-        $stmt->execute([$username]);
-        $user = $stmt->fetch();
+        $user = false;
+        try {
+            $stmt = $pdo->prepare(
+                "SELECT u.id, u.username, u.password, u.role, u.student_id, u.is_active, s.student_code
+                 FROM users u
+                 LEFT JOIN students s ON u.student_id = s.id
+                 WHERE u.username = ?"
+            );
+            $stmt->execute([$username]);
+            $user = $stmt->fetch();
+        } catch (PDOException $e) {
+            // Gracefully catch database exceptions (like charset errors on free hosting)
+            $user = false;
+        }
 
         if ($user && password_verify($password, $user['password']) && $user['is_active']) {
             $_SESSION['user_id'] = $user['id'];
