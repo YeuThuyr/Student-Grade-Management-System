@@ -2,11 +2,17 @@ SET NAMES utf8mb4;
 
 -- 1. Xóa dữ liệu cũ (để tránh lỗi trùng khóa khi chạy lại)
 SET FOREIGN_KEY_CHECKS = 0;
-TRUNCATE TABLE grades;
-TRUNCATE TABLE subjects;
-TRUNCATE TABLE users;
-TRUNCATE TABLE students;
-TRUNCATE TABLE classes;
+DELETE FROM grades;
+DELETE FROM subjects;
+DELETE FROM users;
+DELETE FROM students;
+DELETE FROM classes;
+
+ALTER TABLE grades AUTO_INCREMENT = 1;
+ALTER TABLE subjects AUTO_INCREMENT = 1;
+ALTER TABLE users AUTO_INCREMENT = 1;
+ALTER TABLE students AUTO_INCREMENT = 1;
+ALTER TABLE classes AUTO_INCREMENT = 1;
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- 2. Dữ liệu lớp học

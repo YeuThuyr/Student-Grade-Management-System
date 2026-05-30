@@ -20,14 +20,19 @@ echo "=== HUST Student Grade Management System - Large Data Seeder ===\n";
 echo "Starting data generation at: " . date('Y-m-d H:i:s') . "\n\n";
 
 try {
-    // 1. Truncate existing tables safely
+    // 1. Clean up old tables safely
     echo "[1/6] Cleaning up old tables...\n";
     $pdo->exec("SET FOREIGN_KEY_CHECKS = 0;");
-    $pdo->exec("TRUNCATE TABLE grades;");
-    $pdo->exec("TRUNCATE TABLE users;");
-    $pdo->exec("TRUNCATE TABLE students;");
-    $pdo->exec("TRUNCATE TABLE subjects;");
-    $pdo->exec("TRUNCATE TABLE classes;");
+    $pdo->exec("DELETE FROM grades;");
+    $pdo->exec("DELETE FROM users;");
+    $pdo->exec("DELETE FROM students;");
+    $pdo->exec("DELETE FROM subjects;");
+    $pdo->exec("DELETE FROM classes;");
+    $pdo->exec("ALTER TABLE grades AUTO_INCREMENT = 1;");
+    $pdo->exec("ALTER TABLE users AUTO_INCREMENT = 1;");
+    $pdo->exec("ALTER TABLE students AUTO_INCREMENT = 1;");
+    $pdo->exec("ALTER TABLE subjects AUTO_INCREMENT = 1;");
+    $pdo->exec("ALTER TABLE classes AUTO_INCREMENT = 1;");
     $pdo->exec("SET FOREIGN_KEY_CHECKS = 1;");
     echo "✔ Tables cleaned successfully.\n\n";
 
