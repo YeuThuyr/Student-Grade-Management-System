@@ -6,6 +6,8 @@ $f_search = isset($_GET['student_code']) ? trim($_GET['student_code']) : '';
 $f_year = isset($_GET['academic_year']) ? trim($_GET['academic_year']) : '';
 $f_gender = isset($_GET['gender']) ? trim($_GET['gender']) : '';
 $f_gpa = isset($_GET['gpa_range']) ? trim($_GET['gpa_range']) : '';
+$f_entry_year = isset($_GET['entry_year']) ? trim($_GET['entry_year']) : '';
+$f_class_id = isset($_GET['class_id']) ? trim($_GET['class_id']) : '';
 
 // Build dynamic WHERE clause
 $where_clauses = ["1=1"];
@@ -26,6 +28,16 @@ if ($f_year !== '') {
     $where_clauses[] = "g.academic_year = ?";
     $params[] = $f_year;
     $types .= "s";
+}
+if ($f_entry_year !== '') {
+    $where_clauses[] = "SUBSTRING(s.student_code, 1, 4) = ?";
+    $params[] = $f_entry_year;
+    $types .= "s";
+}
+if ($f_class_id !== '') {
+    $where_clauses[] = "s.class_id = ?";
+    $params[] = $f_class_id;
+    $types .= "i";
 }
 
 $where_sql = implode(" AND ", $where_clauses);

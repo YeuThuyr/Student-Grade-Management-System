@@ -1,0 +1,8 @@
+.git
+.grapuco
+.github
+tmp_hash.php
+tmp_update.sql
+tmp_verify.php
+config/database.php
+README.md

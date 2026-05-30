@@ -11,9 +11,7 @@ function handleAuth()
         session_start();
     }
 
-    if (!defined('BASE_PATH')) {
-        define('BASE_PATH', '/grade_management/');
-    }
+    require_once __DIR__ . '/../config/env.php';
 
     if (!isset($_SESSION['user_id'])) {
 

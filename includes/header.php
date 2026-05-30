@@ -5,10 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 $isLoggedIn = isset($_SESSION['user_id']);
 
-// Xác định thư mục gốc để nạp file tĩnh đúng đường dẫn
-if (!defined('BASE_PATH')) {
-    define('BASE_PATH', '/grade_management/');
-}
+require_once __DIR__ . '/../config/env.php';
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo get_app_lang(); ?>">

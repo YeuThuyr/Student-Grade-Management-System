@@ -6,7 +6,6 @@ require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/helpers.php';
 handleAuth();
 checkRole(['admin']);
-require_once __DIR__ . '/stats/summary.php'; // This provides $summary array
 
 // Fetch distinct academic years for the filter
 $years = [];
@@ -14,14 +13,113 @@ $y_res = $conn->query("SELECT DISTINCT academic_year FROM grades WHERE academic_
 while ($row = $y_res->fetch_assoc())
     $years[] = $row['academic_year'];
 
-// --- Search logic ---
+// Fetch distinct entry years (Khóa học) dynamically from student code
+$entry_years = [];
+$ey_res = $conn->query("SELECT DISTINCT SUBSTRING(student_code, 1, 4) AS entry_year FROM students WHERE student_code IS NOT NULL AND is_active = 1 ORDER BY entry_year DESC");
+while ($row = $ey_res->fetch_assoc()) {
+    if (!empty($row['entry_year'])) {
+        $entry_years[] = $row['entry_year'];
+    }
+}
+
+// Fetch all classes dynamically (Field of study)
+$classes_list = [];
+$c_res = $conn->query("SELECT id, class_code, class_name FROM classes ORDER BY class_name ASC");
+while ($row = $c_res->fetch_assoc()) {
+    $classes_list[] = $row;
+}
+
+// --- Filter and Search logic ---
 $search_code = isset($_GET['student_code']) ? trim($_GET['student_code']) : '';
 $f_year = isset($_GET['academic_year']) ? trim($_GET['academic_year']) : '';
 $f_gender = isset($_GET['gender']) ? trim($_GET['gender']) : '';
 $f_gpa = isset($_GET['gpa_range']) ? trim($_GET['gpa_range']) : '';
+$f_entry_year = isset($_GET['entry_year']) ? trim($_GET['entry_year']) : '';
+$f_class_id = isset($_GET['class_id']) ? trim($_GET['class_id']) : '';
+
+$has_specific_filters = ($f_year !== '' || $f_entry_year !== '' || $f_class_id !== '');
+$search_performed = ($search_code !== '' || $f_year !== '' || $f_gender !== '' || $f_gpa !== '' || $f_entry_year !== '' || $f_class_id !== '');
+
+if ($has_specific_filters) {
+    require_once __DIR__ . '/stats/summary.php'; // This provides $summary array
+    
+    // Fetch Top 5 Students
+    $top_students = [];
+    $ts_where = $where_sql;
+    $ts_query = "
+        SELECT s.student_code, s.full_name, c.class_name, ROUND(AVG(g.average_score), 2) as gpa
+        FROM students s
+        LEFT JOIN classes c ON s.class_id = c.id
+        JOIN grades g ON s.id = g.student_id
+        WHERE $ts_where
+        GROUP BY s.id
+        ORDER BY gpa DESC
+        LIMIT 5
+    ";
+    $stmt = $conn->prepare($ts_query);
+    if (!empty($params)) {
+        $stmt->bind_param($types, ...$params);
+    }
+    $stmt->execute();
+    $res = $stmt->get_result();
+    while ($row = $res->fetch_assoc()) {
+        $top_students[] = $row;
+    }
+    $stmt->close();
+
+    // Fetch Top 5 Subjects
+    $top_subjects = [];
+    $sub_query = "
+        SELECT sub.subject_code, sub.subject_name, ROUND(AVG(g.average_score), 2) as avg_score, COUNT(g.id) as enrollments
+        FROM grades g
+        JOIN subjects sub ON g.subject_id = sub.id
+        JOIN students s ON g.student_id = s.id
+        WHERE $where_sql
+        GROUP BY sub.id
+        ORDER BY avg_score DESC
+        LIMIT 5
+    ";
+    $stmt = $conn->prepare($sub_query);
+    if (!empty($params)) {
+        $stmt->bind_param($types, ...$params);
+    }
+    $stmt->execute();
+    $res = $stmt->get_result();
+    while ($row = $res->fetch_assoc()) {
+        $top_subjects[] = $row;
+    }
+    $stmt->close();
+
+    // Fetch Gender Breakdown
+    $gender_breakdown = [];
+    $gender_query = "
+        SELECT s.gender, COUNT(DISTINCT s.id) as student_count, ROUND(AVG(g.average_score), 2) as avg_gpa
+        FROM students s
+        JOIN grades g ON s.id = g.student_id
+        WHERE $where_sql
+        GROUP BY s.gender
+    ";
+    $stmt = $conn->prepare($gender_query);
+    if (!empty($params)) {
+        $stmt->bind_param($types, ...$params);
+    }
+    $stmt->execute();
+    $res = $stmt->get_result();
+    while ($row = $res->fetch_assoc()) {
+        $gender_breakdown[$row['gender']] = $row;
+    }
+    $stmt->close();
+} else {
+    $summary = [
+        'total_students' => 0,
+        'average_gpa' => 0,
+        'pass_rate' => 0,
+        'pass_count' => 0,
+        'fail_count' => 0
+    ];
+}
 
 $search_results = [];
-$search_performed = ($search_code !== '' || $f_year !== '' || $f_gender !== '' || $f_gpa !== '');
 
 if ($search_performed) {
     $where_clauses = ["1=1"];
@@ -37,6 +135,16 @@ if ($search_performed) {
         $where_clauses[] = "s.gender = ?";
         $params[] = $f_gender;
         $types .= "s";
+    }
+    if ($f_entry_year !== '') {
+        $where_clauses[] = "SUBSTRING(s.student_code, 1, 4) = ?";
+        $params[] = $f_entry_year;
+        $types .= "s";
+    }
+    if ($f_class_id !== '') {
+        $where_clauses[] = "s.class_id = ?";
+        $params[] = $f_class_id;
+        $types .= "i";
     }
 
     $where_sql = implode(" AND ", $where_clauses);
@@ -94,27 +202,42 @@ require_once __DIR__ . '/includes/header.php';
         </a>
     </div>
 
-    <!-- Summary Cards -->
-    <div class="row g-4 mb-5">
-        <div class="col-12 col-md-4">
-            <div class="card border-0 shadow-sm rounded-4 p-4 text-center h-100 bg-white">
-                <div class="display-5 fw-bold text-primary mb-2"><?php echo $summary['total_students']; ?></div>
-                <div class="text-muted text-uppercase tracking-wider small fw-bold" data-i18n="dash_total_students">Tổng số sinh viên</div>
+    <!-- Summary Cards and Analytics State -->
+    <?php if ($has_specific_filters): ?>
+        <div class="row g-4 mb-5">
+            <div class="col-12 col-md-4">
+                <div class="card border-0 shadow-sm rounded-4 p-4 text-center h-100 bg-white">
+                    <div class="display-5 fw-bold text-primary mb-2"><?php echo $summary['total_students']; ?></div>
+                    <div class="text-muted text-uppercase tracking-wider small fw-bold" data-i18n="dash_total_students">Tổng số sinh viên</div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card border-0 shadow-sm rounded-4 p-4 text-center h-100 bg-white">
+                    <div class="display-5 fw-bold text-success mb-2"><?php echo $summary['average_gpa']; ?></div>
+                    <div class="text-muted text-uppercase tracking-wider small fw-bold" data-i18n="dash_avg_gpa">GPA Trung Bình</div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card border-0 shadow-sm rounded-4 p-4 text-center h-100 bg-white">
+                    <div class="display-5 fw-bold text-danger mb-2"><?php echo $summary['pass_rate']; ?>%</div>
+                    <div class="text-muted text-uppercase tracking-wider small fw-bold" data-i18n="dash_pass_rate">Tỷ lệ Đạt</div>
+                </div>
             </div>
         </div>
-        <div class="col-12 col-md-4">
-            <div class="card border-0 shadow-sm rounded-4 p-4 text-center h-100 bg-white">
-                <div class="display-5 fw-bold text-success mb-2"><?php echo $summary['average_gpa']; ?></div>
-                <div class="text-muted text-uppercase tracking-wider small fw-bold" data-i18n="dash_avg_gpa">GPA Trung Bình</div>
+    <?php else: ?>
+        <div class="card border-0 shadow-sm rounded-4 p-5 text-center mb-5 bg-white position-relative overflow-hidden" style="border: 1px dashed rgba(220, 53, 69, 0.2) !important;">
+            <div class="py-4">
+                <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-4"
+                     style="width: 90px; height: 90px; background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.05));">
+                    <i class="fas fa-filter fa-3x text-danger animate-pulse"></i>
+                </div>
+                <h4 class="fw-bold text-dark mb-2" data-i18n="dash_select_filter_title">Chưa chọn bộ lọc thống kê</h4>
+                <p class="text-muted mx-auto" style="max-width: 500px;" data-i18n="dash_select_filter_desc">
+                    Vui lòng chọn <strong>Khóa học</strong>, <strong>Chuyên ngành</strong>, hoặc <strong>Năm học</strong> để xem thống kê số liệu sinh viên, tỷ lệ đạt/trượt và các biểu đồ phân tích.
+                </p>
             </div>
         </div>
-        <div class="col-12 col-md-4">
-            <div class="card border-0 shadow-sm rounded-4 p-4 text-center h-100 bg-white">
-                <div class="display-5 fw-bold text-danger mb-2"><?php echo $summary['pass_rate']; ?>%</div>
-                <div class="text-muted text-uppercase tracking-wider small fw-bold" data-i18n="dash_pass_rate">Tỷ lệ Đạt</div>
-            </div>
-        </div>
-    </div>
+    <?php endif; ?>
 
     <!-- Search Section -->
     <div class="card border-0 shadow-sm rounded-4 p-4 mb-5 bg-white search-section">
@@ -140,7 +263,29 @@ require_once __DIR__ . '/includes/header.php';
 
             <!-- Filters row -->
             <div class="row g-3 mt-2 user-select-none">
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-sm-6 col-lg">
+                    <label class="form-label text-muted small fw-bold mb-1" data-i18n="dash_filter_entry_year">Khóa học</label>
+                    <select name="entry_year" class="form-select filter-select"
+                        onchange="document.getElementById('searchForm').submit()">
+                        <option value="" data-i18n="dash_all_entry_years">Tất cả các khóa</option>
+                        <?php foreach ($entry_years as $ey): ?>
+                            <option value="<?php echo htmlspecialchars($ey); ?>" <?php if ($f_entry_year === $ey)
+                                   echo 'selected'; ?>>Khóa <?php echo htmlspecialchars($ey); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-12 col-sm-6 col-lg">
+                    <label class="form-label text-muted small fw-bold mb-1" data-i18n="dash_filter_class">Chuyên ngành</label>
+                    <select name="class_id" class="form-select filter-select"
+                        onchange="document.getElementById('searchForm').submit()">
+                        <option value="" data-i18n="dash_all_classes">Tất cả các ngành</option>
+                        <?php foreach ($classes_list as $cls): ?>
+                            <option value="<?php echo htmlspecialchars($cls['id']); ?>" <?php if ($f_class_id == $cls['id'])
+                                   echo 'selected'; ?>><?php echo htmlspecialchars($cls['class_name']); ?> (<?php echo htmlspecialchars($cls['class_code']); ?>)</option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-12 col-sm-6 col-lg">
                     <label class="form-label text-muted small fw-bold mb-1" data-i18n="dash_filter_year">Năm học</label>
                     <select name="academic_year" class="form-select filter-select"
                         onchange="document.getElementById('searchForm').submit()">
@@ -151,7 +296,7 @@ require_once __DIR__ . '/includes/header.php';
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-sm-6 col-lg">
                     <label class="form-label text-muted small fw-bold mb-1" data-i18n="dash_filter_gender">Giới tính</label>
                     <select name="gender" class="form-select filter-select"
                         onchange="document.getElementById('searchForm').submit()">
@@ -162,7 +307,7 @@ require_once __DIR__ . '/includes/header.php';
                             echo 'selected'; ?> data-i18n="dash_female">Nữ</option>
                     </select>
                 </div>
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-sm-6 col-lg">
                     <label class="form-label text-muted small fw-bold mb-1" data-i18n="dash_filter_gpa">Xếp loại GPA</label>
                     <select name="gpa_range" class="form-select filter-select"
                         onchange="document.getElementById('searchForm').submit()">
@@ -272,27 +417,123 @@ require_once __DIR__ . '/includes/header.php';
         <?php endif; ?>
     </div>
 
-    <!-- Charts Row -->
-    <div class="row g-4">
-        <!-- Pass/Fail Chart -->
-        <div class="col-12 col-lg-5">
-            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 bg-white">
-                <h5 class="fw-bold mb-4 text-dark text-center" data-i18n="dash_pass_fail_chart">Tỷ lệ Đạt / Trượt</h5>
-                <div style="height: 300px;">
-                    <canvas id="passFailChart"></canvas>
+    <!-- Dynamic Analytics Charts & Rich Widgets -->
+    <?php if ($has_specific_filters): ?>
+        <!-- Rich Analytical Widgets -->
+        <div class="row g-4 mb-5">
+            <!-- Top 5 Students -->
+            <div class="col-12 col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 p-4 h-100 bg-white">
+                    <h5 class="fw-bold mb-4 text-dark"><i class="fas fa-trophy text-warning me-2"></i>Top Sinh Viên Xuất Sắc</h5>
+                    <?php if (!empty($top_students)): ?>
+                        <div class="list-group list-group-flush">
+                            <?php foreach ($top_students as $idx => $student): ?>
+                                <div class="list-group-item px-0 py-3 d-flex align-items-center justify-content-between border-0 border-bottom">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="badge bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; font-weight: 700;"><?php echo $idx + 1; ?></span>
+                                        <div>
+                                            <div class="fw-bold text-dark"><?php echo htmlspecialchars($student['full_name']); ?></div>
+                                            <small class="text-muted"><?php echo htmlspecialchars($student['student_code']); ?> | <?php echo htmlspecialchars($student['class_name'] ?? 'Chưa rõ'); ?></small>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-success-subtle text-success fs-6 px-3 py-2 fw-bold">GPA: <?php echo $student['gpa']; ?></span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="text-center py-5 text-muted">
+                            <i class="fas fa-user-friends fa-2x mb-2 text-black-50"></i>
+                            <div>Không có dữ liệu sinh viên phù hợp</div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Top 5 Subjects -->
+            <div class="col-12 col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 p-4 h-100 bg-white">
+                    <h5 class="fw-bold mb-4 text-dark"><i class="fas fa-book-open text-primary me-2"></i>Môn Học Điểm Cao Nhất</h5>
+                    <?php if (!empty($top_subjects)): ?>
+                        <div class="list-group list-group-flush">
+                            <?php foreach ($top_subjects as $idx => $subj): ?>
+                                <div class="list-group-item px-0 py-3 d-flex align-items-center justify-content-between border-0 border-bottom">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="badge bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; font-weight: 700;"><?php echo $idx + 1; ?></span>
+                                        <div>
+                                            <div class="fw-bold text-dark"><?php echo htmlspecialchars($subj['subject_name']); ?></div>
+                                            <small class="text-muted"><?php echo htmlspecialchars($subj['subject_code']); ?> (<?php echo htmlspecialchars($subj['enrollments']); ?> lượt học)</small>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-primary-subtle text-primary fs-6 px-3 py-2 fw-bold"><?php echo $subj['avg_score']; ?></span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="text-center py-5 text-muted">
+                            <i class="fas fa-book fa-2x mb-2 text-black-50"></i>
+                            <div>Không có dữ liệu môn học phù hợp</div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Gender & GPA Analytics -->
+            <div class="col-12 col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 p-4 h-100 bg-white">
+                    <h5 class="fw-bold mb-4 text-dark"><i class="fas fa-chart-pie text-danger me-2"></i>Thống Kê Theo Giới Tính</h5>
+                    <div class="d-flex flex-column justify-content-center h-100 py-3">
+                        <?php 
+                        $male_stats = $gender_breakdown['Male'] ?? ['student_count' => 0, 'avg_gpa' => '—'];
+                        $female_stats = $gender_breakdown['Female'] ?? ['student_count' => 0, 'avg_gpa' => '—'];
+                        ?>
+                        <div class="p-3 mb-3 rounded-3 bg-light border-start border-4 border-primary d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="fw-bold text-dark"><i class="fas fa-mars text-primary me-2"></i>Nam giới</div>
+                                <small class="text-muted"><?php echo $male_stats['student_count']; ?> sinh viên</small>
+                            </div>
+                            <div class="text-end">
+                                <div class="small text-muted mb-1">GPA TB</div>
+                                <span class="badge bg-primary text-white fs-6 px-3 py-2 fw-bold"><?php echo $male_stats['avg_gpa']; ?></span>
+                            </div>
+                        </div>
+
+                        <div class="p-3 rounded-3 bg-light border-start border-4 border-pink d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="fw-bold text-dark"><i class="fas fa-venus text-pink me-2"></i>Nữ giới</div>
+                                <small class="text-muted"><?php echo $female_stats['student_count']; ?> sinh viên</small>
+                            </div>
+                            <div class="text-end">
+                                <div class="small text-muted mb-1">GPA TB</div>
+                                <span class="badge bg-pink text-white fs-6 px-3 py-2 fw-bold"><?php echo $female_stats['avg_gpa']; ?></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <!-- Grade Distribution Chart -->
-        <div class="col-12 col-lg-7">
-            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 bg-white">
-                <h5 class="fw-bold mb-4 text-dark text-center" data-i18n="dash_grade_dist_chart">Phân bố điểm chữ</h5>
-                <div style="height: 300px;">
-                    <canvas id="gradeDistChart"></canvas>
+
+        <!-- Charts Row -->
+        <div class="row g-4 mb-5">
+            <!-- Pass/Fail Chart -->
+            <div class="col-12 col-lg-5">
+                <div class="card border-0 shadow-sm rounded-4 p-4 h-100 bg-white">
+                    <h5 class="fw-bold mb-4 text-dark text-center" data-i18n="dash_pass_fail_chart">Tỷ lệ Đạt / Trượt</h5>
+                    <div style="height: 300px;">
+                        <canvas id="passFailChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- Grade Distribution Chart -->
+            <div class="col-12 col-lg-7">
+                <div class="card border-0 shadow-sm rounded-4 p-4 h-100 bg-white">
+                    <h5 class="fw-bold mb-4 text-dark text-center" data-i18n="dash_grade_dist_chart">Phân bố điểm chữ</h5>
+                    <div style="height: 300px;">
+                        <canvas id="gradeDistChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    <?php endif; ?>
 </div>
 
 <!-- Chart.js CDN -->
@@ -300,13 +541,16 @@ require_once __DIR__ . '/includes/header.php';
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        const passFailCanvas = document.getElementById('passFailChart');
+        if (!passFailCanvas) return; // Skip chart building if filters are not applied
+
         // Fetch data for charts with current filters
         const queryParams = window.location.search;
         fetch('stats/chart_data.php' + queryParams)
             .then(response => response.json())
             .then(data => {
                 // Pass/Fail Chart
-                const ctxPF = document.getElementById('passFailChart').getContext('2d');
+                const ctxPF = passFailCanvas.getContext('2d');
                 new Chart(ctxPF, {
                     type: 'doughnut',
                     data: {
@@ -598,6 +842,18 @@ require_once __DIR__ . '/includes/header.php';
     .gender-female {
         background: #fce4ec;
         color: #e91e63;
+    }
+
+    .border-pink {
+        border-color: #e91e63 !important;
+    }
+
+    .text-pink {
+        color: #e91e63 !important;
+    }
+
+    .bg-pink {
+        background-color: #e91e63 !important;
     }
 
     /* GPA badges */
