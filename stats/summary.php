@@ -1,4 +1,15 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+require_once __DIR__ . '/../middleware/rate_limit.php';
+// Limit clients to 60 requests per minute
+handleRateLimit(60, 60);
+
+// Release session lock early to support high concurrency (SYS-NFR-02)
+session_write_close();
+
 require_once __DIR__ . '/../config/database.php';
 
 // Filter params
@@ -12,64 +23,54 @@ $f_class_id = isset($_GET['class_id']) ? trim($_GET['class_id']) : '';
 // Build dynamic WHERE and HAVING clauses
 $where_clauses = ["1=1"];
 $params = [];
-$types = "";
 
 if ($f_search !== '') {
     $where_clauses[] = "s.student_code LIKE ?";
     $params[] = $f_search . '%';
-    $types .= "s";
 }
 if ($f_gender !== '') {
     $where_clauses[] = "s.gender = ?";
     $params[] = $f_gender;
-    $types .= "s";
 }
 if ($f_entry_year !== '') {
     $where_clauses[] = "SUBSTRING(s.student_code, 1, 4) = ?";
     $params[] = $f_entry_year;
-    $types .= "s";
 }
 if ($f_class_id !== '') {
     $where_clauses[] = "s.class_id = ?";
     $params[] = $f_class_id;
-    $types .= "i";
 }
 
 $where_sql = implode(" AND ", $where_clauses);
 
 // 1. Total students (need to join grades if filtering by year)
-// If year is selected, only count students who have records in that year
 if ($f_year !== '') {
     $total_students_query = "SELECT COUNT(DISTINCT s.id) as total FROM students s JOIN grades g ON s.id = g.student_id WHERE $where_sql AND g.academic_year = ?";
     $total_params = $params;
     $total_params[] = $f_year;
-    $total_types = $types . "s";
 } else {
     $total_students_query = "SELECT COUNT(DISTINCT s.id) as total FROM students s WHERE $where_sql";
     $total_params = $params;
-    $total_types = $types;
 }
 
-$stmt = $conn->prepare($total_students_query);
-if (!empty($total_params)) {
-    $stmt->bind_param($total_types, ...$total_params);
-}
-$stmt->execute();
-$total_students = $stmt->get_result()->fetch_assoc()['total'];
-$stmt->close();
+$stmt = $pdo->prepare($total_students_query);
+$stmt->execute($total_params);
+$total_students = (int)$stmt->fetchColumn();
 
 // 2. Average GPA and Pass/Fail (only considering filtered students)
-// We calculate each student's overall GPA first, then average those, or filter by year.
 $grades_where = $where_sql;
+$grades_params = $params;
 if ($f_year !== '') {
     $grades_where .= " AND g.academic_year = ?";
+    $grades_params[] = $f_year;
 }
 
-// Subquery to get average GPA per student
+// Subquery to get credit-weighted GPA per student
 $student_gpas_query = "
-    SELECT s.id, AVG(g.average_score) as student_gpa
+    SELECT s.id, SUM(g.average_score * sub.credit) / SUM(sub.credit) as student_gpa
     FROM students s
     JOIN grades g ON s.id = g.student_id
+    JOIN subjects sub ON g.subject_id = sub.id
     WHERE $grades_where
     GROUP BY s.id
 ";
@@ -83,25 +84,16 @@ elseif ($f_gpa === 'weak') $having_clause = " HAVING student_gpa < 5.0";
 
 $student_gpas_query .= $having_clause;
 
-$stmt = $conn->prepare($student_gpas_query);
-if ($f_year !== '') {
-    $g_params = $params;
-    $g_params[] = $f_year;
-    $g_types = $types . "s";
-    $stmt->bind_param($g_types, ...$g_params);
-} elseif (!empty($params)) {
-    $stmt->bind_param($types, ...$params);
-}
-
-$stmt->execute();
-$res = $stmt->get_result();
+$stmt = $pdo->prepare($student_gpas_query);
+$stmt->execute($grades_params);
+$res = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $total_gpa_sum = 0;
 $valid_students_count = 0;
 $pass_count = 0;
 $fail_count = 0;
 
-while ($row = $res->fetch_assoc()) {
+foreach ($res as $row) {
     $gpa = (float)$row['student_gpa'];
     $total_gpa_sum += $gpa;
     $valid_students_count++;
@@ -111,7 +103,6 @@ while ($row = $res->fetch_assoc()) {
         $fail_count++;
     }
 }
-$stmt->close();
 
 // Recalculate total students if GPA filter is applied
 if ($f_gpa !== '') {
@@ -130,7 +121,6 @@ $summary = [
 ];
 
 if (basename($_SERVER['PHP_SELF']) == 'summary.php') {
-    header('Content-Type: application/json');
+    header('Content-Type: application/json; charset=utf-8');
     echo json_encode($summary);
 }
-?>

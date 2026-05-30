@@ -10,6 +10,10 @@ if (isset($_SESSION['user_id'])) {
     exit();
 }
 
+require_once __DIR__ . '/../middleware/rate_limit.php';
+// Limit login/brute-force attempts to 60 requests per minute
+handleRateLimit(60, 60);
+
 require_once '../config/database.php';
 require_once '../includes/helpers.php';
 
@@ -39,6 +43,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ];
 
             if ($user['role'] === 'admin') {
+                // Cryptographic fingerprint for session hijacking defense (SYS-FR-01)
+                $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+                $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+                $_SESSION['admin_fingerprint'] = hash_hmac(
+                    'sha256', 
+                    $user['id'] . '|' . $ip . '|' . $userAgent, 
+                    'HUST-GradeMgmt-Secret-Key-2026'
+                );
                 header('Location: ../dashboard.php');
             } else {
                 header('Location: ../students/profile.php');

@@ -133,11 +133,7 @@ if (isset($_POST['run_seeder'])) {
                 $oth = round(rand(60, 100) / 10, 1);
                 $avg = round(($mid * 0.3) + ($fin * 0.5) + ($oth * 0.2), 1);
                 
-                $letter = 'F';
-                if ($avg >= 8.5) $letter = 'A';
-                elseif ($avg >= 7.0) $letter = 'B';
-                elseif ($avg >= 5.5) $letter = 'C';
-                elseif ($avg >= 4.0) $letter = 'D';
+                $letter = determineLetterGrade($avg);
 
                 $gradesToInsert[] = [$s['id'], $subId, $mid, $fin, $oth, $avg, $letter, '1', '2023-2024'];
             }
@@ -194,10 +190,11 @@ if ($searchCode !== '' && $totalStudents > 0) {
     // MySQL has a unique index on 'student_code'. This is O(log N) depth point lookup.
     $startSql = microtime(true);
     $stmt = $pdo->prepare("
-        SELECT s.*, c.class_name, ROUND(AVG(g.average_score), 2) as gpa
+        SELECT s.*, c.class_name, ROUND(SUM(g.average_score * subj.credit) / SUM(subj.credit), 2) as gpa
         FROM students s
         LEFT JOIN classes c ON s.class_id = c.id
         LEFT JOIN grades g ON s.id = g.student_id
+        LEFT JOIN subjects subj ON g.subject_id = subj.id
         WHERE s.student_code = ? AND s.is_active = 1
         GROUP BY s.id
         LIMIT 1

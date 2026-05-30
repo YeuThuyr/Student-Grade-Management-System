@@ -31,6 +31,26 @@ function checkRole($allowedRoles = [])
 
     $userRole = $_SESSION['user']['role'] ?? '';
 
+    // Verify cryptographic admin fingerprint (SYS-FR-01)
+    if ($userRole === 'admin') {
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $expectedFingerprint = hash_hmac(
+            'sha256', 
+            $_SESSION['user_id'] . '|' . $ip . '|' . $userAgent, 
+            'HUST-GradeMgmt-Secret-Key-2026'
+        );
+        $storedFingerprint = $_SESSION['admin_fingerprint'] ?? '';
+
+        if (!hash_equals($expectedFingerprint, $storedFingerprint)) {
+            // Destroy hijacked/invalid session
+            session_unset();
+            session_destroy();
+            http_response_code(401);
+            die("<h3>Security Exception</h3><p>Cryptographic identity verification failed. Session invalid.</p>");
+        }
+    }
+
     if (!empty($allowedRoles) && !in_array($userRole, $allowedRoles)) {
         $isApi = strpos($_SERVER['REQUEST_URI'], '/api/') !== false ||
             (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);

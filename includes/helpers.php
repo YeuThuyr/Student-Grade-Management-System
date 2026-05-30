@@ -15,24 +15,28 @@ function calculateAverageScore($midterm, $final, $other)
     $midterm = floatval($midterm);
     $final = floatval($final);
     $other = floatval($other);
-    return round(($midterm + $final + $other) / 3, 2);
+    return round(($midterm * 0.30) + ($final * 0.50) + ($other * 0.20), 2);
 }
 
 function determineLetterGrade($score)
 {
+    $score = floatval($score);
     if ($score >= 9.0) {
         return 'A+';
     }
-    if ($score >= 8.0) {
+    if ($score >= 8.5) {
         return 'A';
     }
-    if ($score >= 7.0) {
+    if ($score >= 8.0) {
         return 'B+';
     }
-    if ($score >= 6.5) {
+    if ($score >= 7.0) {
         return 'B';
     }
-    if ($score >= 5.0) {
+    if ($score >= 6.5) {
+        return 'C+';
+    }
+    if ($score >= 5.5) {
         return 'C';
     }
     if ($score >= 4.0) {
@@ -45,9 +49,10 @@ function gradePoint($letter)
 {
     return match ($letter) {
         'A+' => 4.0,
-        'A' => 4.0,
+        'A' => 3.7,
         'B+' => 3.5,
         'B' => 3.0,
+        'C+' => 2.5,
         'C' => 2.0,
         'D' => 1.0,
         default => 0.0,

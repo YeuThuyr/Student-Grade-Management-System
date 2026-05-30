@@ -17,6 +17,9 @@ if (!$studentId) {
     exit();
 }
 
+// Release session lock early to prevent blocking concurrent connections
+session_write_close();
+
 $stmt = $pdo->prepare('SELECT id, student_code, full_name, date_of_birth, gender, email, phone, address, class_id FROM students WHERE id = ? AND is_active = 1');
 $stmt->execute([$studentId]);
 $student = $stmt->fetch();
@@ -35,13 +38,24 @@ $gradesStmt->execute([$studentId]);
 $grades = $gradesStmt->fetchAll();
 
 $gpa = 0.0;
-$gradeCount = count($grades);
-if ($gradeCount > 0) {
-    $total = 0;
-    foreach ($grades as $grade) {
-        $total += floatval($grade['average_score']);
-    }
-    $gpa = round($total / $gradeCount, 2);
+$cpa = 0.0;
+$totalCredits = 0;
+$totalWeightedScore = 0.0;
+$totalWeightedPoint = 0.0;
+
+foreach ($grades as $grade) {
+    $credit = intval($grade['credit'] ?? 0);
+    $avgScore = floatval($grade['average_score'] ?? 0.0);
+    $point = gradePoint($grade['letter_grade']);
+    
+    $totalCredits += $credit;
+    $totalWeightedScore += $avgScore * $credit;
+    $totalWeightedPoint += $point * $credit;
+}
+
+if ($totalCredits > 0) {
+    $gpa = round($totalWeightedScore / $totalCredits, 2);
+    $cpa = round($totalWeightedPoint / $totalCredits, 2);
 }
 
 $passFail = gpaPassFail($gpa);
@@ -71,7 +85,8 @@ require_once __DIR__ . '/../includes/header.php';
                 <div class="mb-3"><strong>SĐT:</strong> <?php echo e($student['phone']); ?></div>
                 <div class="mb-3"><strong>Địa chỉ:</strong> <?php echo e($student['address']); ?></div>
                 <div class="alert alert-info mt-4">
-                    <div><strong>GPA hiện tại:</strong> <?php echo e(number_format($gpa, 2)); ?></div>
+                    <div class="mb-1"><strong>GPA (Hệ 10):</strong> <?php echo e(number_format($gpa, 2)); ?></div>
+                    <div class="mb-1"><strong>CPA (Hệ 4):</strong> <span class="badge bg-success px-2 py-1 fs-6"><?php echo e(number_format($cpa, 2)); ?></span></div>
                     <div><strong>Trạng thái:</strong> <?php echo e($passFail); ?></div>
                 </div>
             </div>

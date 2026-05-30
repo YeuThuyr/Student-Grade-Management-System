@@ -41,9 +41,10 @@ $totalPages = max(1, ceil($totalStudents / $perPage));
 
 $query =
     "SELECT s.id, s.student_code, s.full_name, s.date_of_birth, s.gender, s.email, s.phone, s.created_at, c.class_name,
-            ROUND(AVG(g.average_score), 2) AS gpa
+            ROUND(SUM(g.average_score * subj.credit) / SUM(subj.credit), 2) AS gpa
      FROM students s
      LEFT JOIN grades g ON s.id = g.student_id
+     LEFT JOIN subjects subj ON g.subject_id = subj.id
      LEFT JOIN classes c ON s.class_id = c.id
      WHERE $whereSql
      GROUP BY s.id
