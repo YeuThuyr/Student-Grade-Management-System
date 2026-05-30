@@ -1,10 +1,5 @@
 SET NAMES utf8mb4;
 
-CREATE DATABASE IF NOT EXISTS grade_management
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
-USE grade_management;
-
 CREATE TABLE IF NOT EXISTS classes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     class_code VARCHAR(20) NOT NULL UNIQUE,
