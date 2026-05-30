@@ -17,10 +17,10 @@ jobs:
       - name: 🚀 Deploy to FTP server
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.FTP_HOST }}
+          server: ftpupload.net
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: ${{ secrets.FTP_TARGET_DIR }}
+          server-dir: /htdocs/
           exclude: |
             **/.git*
             **/.git*/**
