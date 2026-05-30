@@ -1,8 +1,4 @@
 <?php
-// Temporarily enable error reporting to diagnose the 500 error on the live server
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
 if (!defined('BASE_PATH')) {
     $scriptDir = dirname($_SERVER['SCRIPT_NAME']);
