@@ -52,8 +52,15 @@ body {
     -webkit-text-fill-color: transparent;
 }
 
-/* Custom form inputs focus state matching theme */
-.form-control:focus {
+/* Custom form inputs style and focus state matching theme */
+.form-control,
+.form-select {
+    border-radius: 12px !important;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus,
+.form-select:focus {
     border-color: #f7a6b4;
     box-shadow: 0 0 0 0.25rem rgba(200, 16, 46, 0.25);
 }
