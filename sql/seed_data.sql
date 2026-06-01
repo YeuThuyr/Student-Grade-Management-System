@@ -23,21 +23,21 @@ INSERT INTO classes (class_code, class_name, description) VALUES
 
 -- 3. Dữ liệu sinh viên (Đa dạng các năm: 2021, 2022, 2023, 2024)
 INSERT INTO students (student_code, full_name, date_of_birth, gender, email, phone, address, class_id, is_active) VALUES
-('20230001', 'Nguyễn Văn An', '2005-05-15', 'Male', 'an.nv@example.com', '0123456789', 'Hà Nội', 1, 1),
-('20230002', 'Trần Thị Bình', '2005-08-20', 'Female', 'binh.tt@example.com', '0987654321', 'TP. Hồ Chí Minh', 1, 1),
-('20239614', 'Lê Văn Cường', '2004-12-10', 'Male', 'cuong.lv@example.com', '0345678901', 'Đà Nẵng', 2, 1),
-('20230010', 'Phạm Minh Đức', '2005-01-05', 'Male', 'duc.pm@example.com', '0912123456', 'Hải Phòng', 2, 1),
-('20230025', 'Hoàng Ngọc Hà', '2005-11-22', 'Female', 'ha.hn@example.com', '0923234567', 'Cần Thơ', 1, 1),
-('20220001', 'Vũ Việt Hùng', '2004-03-12', 'Male', 'hung.vv@example.com', '0934345678', 'Nghệ An', 3, 1),
-('20220015', 'Đặng Thu Thảo', '2004-09-30', 'Female', 'thao.dt@example.com', '0945456789', 'Thái Bình', 3, 1),
-('20240001', 'Bùi Xuân Huấn', '2006-02-14', 'Male', 'huan.bx@example.com', '0956567890', 'Lào Cai', 2, 1),
-('20240456', 'Ngô Kiến Huy', '2006-07-08', 'Male', 'huy.nk@example.com', '0967678901', 'Gia Lai', 2, 1),
-('20210012', 'Nguyễn Lan Anh', '2003-10-15', 'Female', 'anh.nl@example.com', '0978789012', 'Quảng Ninh', 1, 1),
-('20230105', 'Trần Bảo Long', '2005-04-18', 'Male', 'long.tb@example.com', '0989890123', 'Bắc Ninh', 1, 1),
-('20220500', 'Lý Hải', '2004-06-06', 'Male', 'hai.l@example.com', '0990901234', 'Tiền Giang', 3, 1),
-('20238888', 'Sơn Tùng M-TP', '2005-07-05', 'Male', 'tung.st@example.com', '0911999888', 'Thái Bình', 2, 1),
-('20231234', 'Nguyễn Thúc Thùy Tiên', '2005-08-12', 'Female', 'tien.ntt@example.com', '0922888777', 'TP. Hồ Chí Minh', 1, 1),
-('20235555', 'Hieuthuhai', '2005-02-28', 'Male', 'hieu.thh@example.com', '0933777666', 'Đồng Nai', 2, 1);
+('20230001', 'Nguyễn Văn An', '2005-05-15', 'Male', 'an.nv@gmail.com', '0123456789', 'Hà Nội', 1, 1),
+('20230002', 'Trần Thị Bình', '2005-08-20', 'Female', 'binh.tt@gmail.com', '0987654321', 'TP. Hồ Chí Minh', 1, 1),
+('20239614', 'Lê Văn Cường', '2004-12-10', 'Male', 'cuong.lv@gmail.com', '0345678901', 'Đà Nẵng', 2, 1),
+('20230010', 'Phạm Minh Đức', '2005-01-05', 'Male', 'duc.pm@gmail.com', '0912123456', 'Hải Phòng', 2, 1),
+('20230025', 'Hoàng Ngọc Hà', '2005-11-22', 'Female', 'ha.hn@gmail.com', '0923234567', 'Cần Thơ', 1, 1),
+('20220001', 'Vũ Việt Hùng', '2004-03-12', 'Male', 'hung.vv@gmail.com', '0934345678', 'Nghệ An', 3, 1),
+('20220015', 'Đặng Thu Thảo', '2004-09-30', 'Female', 'thao.dt@gmail.com', '0945456789', 'Thái Bình', 3, 1),
+('20240001', 'Bùi Xuân Huấn', '2006-02-14', 'Male', 'huan.bx@gmail.com', '0956567890', 'Lào Cai', 2, 1),
+('20240456', 'Ngô Kiến Huy', '2006-07-08', 'Male', 'huy.nk@gmail.com', '0967678901', 'Gia Lai', 2, 1),
+('20210012', 'Nguyễn Lan Anh', '2003-10-15', 'Female', 'anh.nl@gmail.com', '0978789012', 'Quảng Ninh', 1, 1),
+('20230105', 'Trần Bảo Long', '2005-04-18', 'Male', 'long.tb@gmail.com', '0989890123', 'Bắc Ninh', 1, 1),
+('20220500', 'Lý Hải', '2004-06-06', 'Male', 'hai.l@gmail.com', '0990901234', 'Tiền Giang', 3, 1),
+('20238888', 'Sơn Tùng M-TP', '2005-07-05', 'Male', 'tung.st@gmail.com', '0911999888', 'Thái Bình', 2, 1),
+('20231234', 'Nguyễn Thúc Thùy Tiên', '2005-08-12', 'Female', 'tien.ntt@gmail.com', '0922888777', 'TP. Hồ Chí Minh', 1, 1),
+('20235555', 'Hieuthuhai', '2005-02-28', 'Male', 'hieu.thh@gmail.com', '0933777666', 'Đồng Nai', 2, 1);
 
 -- 4. Dữ liệu học phần
 INSERT INTO subjects (subject_code, subject_name, credit, description) VALUES

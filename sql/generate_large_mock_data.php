@@ -38,23 +38,24 @@ try {
 
     // Define bulk insert helper
     $bulkInsert = function ($pdo, $table, $columns, $dataList, $batchSize = 500) {
-        if (empty($dataList)) return;
-        
+        if (empty($dataList))
+            return;
+
         $colString = implode(', ', $columns);
         $placeholders = '(' . implode(', ', array_fill(0, count($columns), '?')) . ')';
-        
+
         $chunks = array_chunk($dataList, $batchSize);
         foreach ($chunks as $chunk) {
             $rowPlaceholders = implode(', ', array_fill(0, count($chunk), $placeholders));
             $sql = "INSERT INTO $table ($colString) VALUES $rowPlaceholders";
-            
+
             $params = [];
             foreach ($chunk as $row) {
                 foreach ($row as $val) {
                     $params[] = $val;
                 }
             }
-            
+
             $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
         }
@@ -108,12 +109,39 @@ try {
 
     // 4. Generate 5,000 Students
     echo "[4/6] Generating 5,000 realistic student records...\n";
-    
+
     // Arrays of Vietnamese names for random generation
     $lastNames = ['Nguyễn', 'Trần', 'Lê', 'Phạm', 'Hoàng', 'Vũ', 'Đặng', 'Bùi', 'Đỗ', 'Hồ', 'Ngô', 'Phan', 'Dương', 'Lý', 'Vương', 'Trịnh'];
     $middleNames = ['Văn', 'Thị', 'Minh', 'Ngọc', 'Hữu', 'Đức', 'Khánh', 'Thu', 'Kim', 'Bảo', 'Xuân', 'Thành', 'Hoàng', 'Phương', 'Anh'];
     $firstNames = [
-        'An', 'Bình', 'Cường', 'Đức', 'Hà', 'Hùng', 'Thảo', 'Huấn', 'Huy', 'Anh', 'Long', 'Hải', 'Tùng', 'Tiên', 'Sơn', 'Tuấn', 'Quân', 'Dũng', 'Trâm', 'Vy', 'Mai', 'Nam', 'Phong', 'Quốc', 'Thịnh', 'Khoa', 'Kiên', 'Hòa'
+        'An',
+        'Bình',
+        'Cường',
+        'Đức',
+        'Hà',
+        'Hùng',
+        'Thảo',
+        'Huấn',
+        'Huy',
+        'Anh',
+        'Long',
+        'Hải',
+        'Tùng',
+        'Tiên',
+        'Sơn',
+        'Tuấn',
+        'Quân',
+        'Dũng',
+        'Trâm',
+        'Vy',
+        'Mai',
+        'Nam',
+        'Phong',
+        'Quốc',
+        'Thịnh',
+        'Khoa',
+        'Kiên',
+        'Hòa'
     ];
     $cities = ['Hà Nội', 'TP. Hồ Chí Minh', 'Đà Nẵng', 'Hải Phòng', 'Cần Thơ', 'Nghệ An', 'Thái Bình', 'Quảng Ninh', 'Bắc Ninh', 'Đồng Nai', 'Gia Lai', 'Lào Cai', 'Thừa Thiên Huế'];
 
@@ -122,29 +150,29 @@ try {
     $studentCodeBase = 20200000;
     $totalStudentsToGenerate = 5000;
     $studentsToInsert = [];
-    
+
     for ($i = 0; $i < $totalStudentsToGenerate; $i++) {
-        $code = (string)($studentCodeBase + $i + 1);
+        $code = (string) ($studentCodeBase + $i + 1);
         $lastName = $lastNames[array_rand($lastNames)];
         $middleName = $middleNames[array_rand($middleNames)];
         $firstName = $firstNames[array_rand($firstNames)];
         $fullName = "$lastName $middleName $firstName";
-        
+
         $gender = (strpos($middleName, 'Thị') !== false || $firstName === 'Tiên' || $firstName === 'Trang' || $firstName === 'Trâm' || $firstName === 'Vy') ? 'Female' : 'Male';
-        
+
         $year = rand(2000, 2006);
         $month = str_pad(rand(1, 12), 2, '0', STR_PAD_LEFT);
         $day = str_pad(rand(1, 28), 2, '0', STR_PAD_LEFT);
         $dob = "$year-$month-$day";
-        
+
         $email = strtolower($firstName) . "." . strtolower($lastName) . $code . "@hust.edu.vn";
         $phone = "0" . rand(3, 9) . rand(10000000, 99999999);
         $address = $cities[array_rand($cities)];
         $classId = $classIds[array_rand($classIds)];
-        
+
         $studentsToInsert[] = [$code, $fullName, $dob, $gender, $email, $phone, $address, $classId, 1];
     }
-    
+
     // Bulk insert students (batch of 500)
     $bulkInsert($pdo, 'students', ['student_code', 'full_name', 'date_of_birth', 'gender', 'email', 'phone', 'address', 'class_id', 'is_active'], $studentsToInsert, 500);
     echo "✔ Seeded all students into database.\n\n";
@@ -154,19 +182,28 @@ try {
 
     // 5. Generate Grades
     echo "[5/6] Generating academic grades for students (3-5 subjects per student)...\n";
-    
+
     $semesters = ['1', '2'];
     $academicYears = ['2023-2024', '2024-2025'];
-    
-    function calculateLetterGrade($avg) {
-        if ($avg >= 9.5) return 'A+';
-        if ($avg >= 8.5) return 'A';
-        if ($avg >= 8.0) return 'B+';
-        if ($avg >= 7.0) return 'B';
-        if ($avg >= 6.5) return 'C+';
-        if ($avg >= 5.5) return 'C';
-        if ($avg >= 5.0) return 'D+';
-        if ($avg >= 4.0) return 'D';
+
+    function calculateLetterGrade($avg)
+    {
+        if ($avg >= 9.5)
+            return 'A+';
+        if ($avg >= 8.5)
+            return 'A';
+        if ($avg >= 8.0)
+            return 'B+';
+        if ($avg >= 7.0)
+            return 'B';
+        if ($avg >= 6.5)
+            return 'C+';
+        if ($avg >= 5.5)
+            return 'C';
+        if ($avg >= 5.0)
+            return 'D+';
+        if ($avg >= 4.0)
+            return 'D';
         return 'F';
     }
 
@@ -176,7 +213,7 @@ try {
         if (!is_array($chosenSubjects)) {
             $chosenSubjects = [$chosenSubjects];
         }
-        
+
         foreach ($chosenSubjects as $subIdx) {
             $subjectId = $subjectIds[$subIdx];
             $mid = round(rand(30, 100) / 10, 1);
@@ -184,10 +221,10 @@ try {
             $oth = round(rand(50, 100) / 10, 1);
             $avg = round(($mid * 0.3) + ($fin * 0.5) + ($oth * 0.2), 1);
             $letter = calculateLetterGrade($avg);
-            
+
             $sem = $semesters[array_rand($semesters)];
             $year = $academicYears[array_rand($academicYears)];
-            
+
             $gradesToInsert[] = [$s['id'], $subjectId, $mid, $fin, $oth, $avg, $letter, $sem, $year];
         }
     }
@@ -197,10 +234,10 @@ try {
 
     // 6. Generate User Login Accounts
     echo "[6/6] Creating user login accounts for students...\n";
-    
+
     $usersToInsert = [];
     $hashedPassword = password_hash("password", PASSWORD_BCRYPT);
-    
+
     // Insert admin account first
     $pdo->exec("INSERT IGNORE INTO users (username, password, role, student_id, is_active) VALUES ('admin', '$hashedPassword', 'admin', NULL, 1)");
 
@@ -209,7 +246,7 @@ try {
     }
     // Bulk insert users (batch of 1000)
     $bulkInsert($pdo, 'users', ['username', 'password', 'role', 'student_id', 'is_active'], $usersToInsert, 1000);
-    
+
     $pdo->commit();
     echo "✔ Created all login profiles successfully.\n\n";
     echo "=== SEEDING COMPLETED SUCCESSFULY ===\n";

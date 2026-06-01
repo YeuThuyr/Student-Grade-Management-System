@@ -44,17 +44,22 @@ if ($academicYear !== '') {
 }
 $whereSql = implode(' AND ', $where);
 
-$gradesStmt = $pdo->prepare(
-    "SELECT g.id, g.semester, g.academic_year, g.midterm_score, g.final_score, g.other_score, g.average_score, g.letter_grade,
-            s.student_code, s.full_name, subj.subject_code AS subject_code, subj.subject_name
-     FROM grades g
-     JOIN students s ON g.student_id = s.id
-     JOIN subjects subj ON g.subject_id = subj.id
-     WHERE $whereSql
-     ORDER BY g.academic_year DESC, g.semester ASC, s.student_code ASC"
-);
-$gradesStmt->execute($params);
-$grades = $gradesStmt->fetchAll();
+$grades = [];
+$hasFilter = ($search !== '' || $subjectId !== '' || $semester !== '' || $academicYear !== '');
+
+if ($hasFilter) {
+    $gradesStmt = $pdo->prepare(
+        "SELECT g.id, g.semester, g.academic_year, g.midterm_score, g.final_score, g.other_score, g.average_score, g.letter_grade,
+                s.student_code, s.full_name, subj.subject_code AS subject_code, subj.subject_name
+         FROM grades g
+         JOIN students s ON g.student_id = s.id
+         JOIN subjects subj ON g.subject_id = subj.id
+         WHERE $whereSql
+         ORDER BY g.academic_year DESC, g.semester ASC, s.student_code ASC"
+    );
+    $gradesStmt->execute($params);
+    $grades = $gradesStmt->fetchAll();
+}
 
 $subjectStmt = $pdo->query('SELECT id, subject_code, subject_name FROM subjects ORDER BY subject_code ASC');
 $subjects = $subjectStmt->fetchAll();
@@ -142,7 +147,12 @@ require_once __DIR__ . '/../includes/header.php';
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (empty($grades)): ?>
+                    <?php if (!$hasFilter): ?>
+                        <tr>
+                            <td colspan="<?php echo $role === 'admin' ? 11 : 10; ?>" class="text-center text-muted py-4" data-i18n="grade_filter_prompt">
+                                Vui lòng nhập hoặc chọn ít nhất một bộ lọc để xem điểm.</td>
+                        </tr>
+                    <?php elseif (empty($grades)): ?>
                         <tr>
                             <td colspan="<?php echo $role === 'admin' ? 11 : 10; ?>" class="text-center text-muted py-4" data-i18n="grade_no_results">
                                 Không có bản ghi điểm phù hợp.</td>
