@@ -126,7 +126,7 @@ require_once __DIR__ . '/../includes/header.php';
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th>#</th>
+                        <th class="ps-4">#</th>
                         <th data-i18n="grade_th_student">Sinh viên</th>
                         <th data-i18n="th_subject">Môn học</th>
                         <th data-i18n="th_semester">HK</th>
@@ -150,7 +150,7 @@ require_once __DIR__ . '/../includes/header.php';
                     <?php else: ?>
                         <?php foreach ($grades as $index => $grade): ?>
                             <tr>
-                                <td><?php echo e($index + 1); ?></td>
+                                <td class="ps-4"><?php echo e($index + 1); ?></td>
                                 <td><?php echo e($grade['student_code'] . ' - ' . $grade['full_name']); ?></td>
                                 <td><?php echo e($grade['subject_code'] . ' - ' . $grade['subject_name']); ?></td>
                                 <td><?php echo e($grade['semester']); ?></td>
