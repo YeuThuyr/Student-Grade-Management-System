@@ -20,16 +20,14 @@ $yearStmt = $pdo->query('SELECT DISTINCT academic_year FROM grades WHERE academi
 $academicYears = $yearStmt->fetchAll();
 
 if ($searched) {
-    if ($studentCode !== '' && !preg_match('/^[0-9]{1,8}$/', $studentCode)) {
-        $error = __('err_numeric_code');
-    } else {
-        $where = ['s.is_active = 1'];
-        $params = [];
+    $where = ['s.is_active = 1'];
+    $params = [];
 
-        if ($studentCode !== '') {
-            $where[] = 's.student_code LIKE ?';
-            $params[] = $studentCode . '%';
-        }
+    if ($studentCode !== '') {
+        $where[] = '(s.student_code LIKE ? OR s.full_name LIKE ?)';
+        $params[] = $studentCode . '%';
+        $params[] = '%' . $studentCode . '%';
+    }
 
         if ($academicYear !== '') {
             $where[] = 'EXISTS (
@@ -85,7 +83,6 @@ if ($searched) {
                 $studentGpas[$student['id']] = null;
             }
         }
-    }
 }
 
 require_once __DIR__ . '/includes/header.php';
@@ -108,7 +105,7 @@ require_once __DIR__ . '/includes/header.php';
                                 <label for="student_code" class="form-label fw-semibold" data-i18n="label_student_code"><?php echo __('label_student_code'); ?></label>
                                 <input type="text" class="form-control form-control-lg" id="student_code"
                                     name="student_code" value="<?php echo e($studentCode); ?>" placeholder="<?php echo e(__('placeholder_student_code')); ?>"
-                                    maxlength="8" inputmode="numeric" pattern="[0-9]{1,8}" data-i18n-placeholder="placeholder_student_code">
+                                    data-i18n-placeholder="placeholder_student_code">
                             </div>
 
                             <div class="col-12 col-md-4">

@@ -56,8 +56,8 @@ function get_all_translations()
 
             // Homepage - Authenticated
             'search_title' => 'Tra cứu điểm sinh viên',
-            'search_subtitle' => 'Nhập một phần mã sinh viên và lọc theo năm học để xem bảng điểm.',
-            'label_student_code' => 'Mã sinh viên',
+            'search_subtitle' => 'Nhập mã sinh viên hoặc họ tên để tra cứu điểm.',
+            'label_student_code' => 'Mã SV hoặc Họ và tên',
             'label_academic_year' => 'Năm học',
             'option_all_years' => 'Tất cả năm học',
             'btn_search' => 'Tra cứu',
@@ -85,7 +85,7 @@ function get_all_translations()
             'footer_copyright' => '© ' . $current_year . ' Đại Học Bách Khoa Hà Nội',
 
             // Placeholder
-            'placeholder_student_code' => 'Ví dụ: 2023',
+            'placeholder_student_code' => 'Nhập mã SV hoặc họ tên...',
 
             // Contact page
             'contact_title' => 'Liên hệ và phản hồi',
@@ -229,8 +229,8 @@ function get_all_translations()
 
             // Homepage - Authenticated
             'search_title' => 'Student Grade Lookup',
-            'search_subtitle' => 'Enter part of the student code and filter by academic year to view transcripts.',
-            'label_student_code' => 'Student Code',
+            'search_subtitle' => 'Enter student ID or full name to view grades.',
+            'label_student_code' => 'Student ID or Full Name',
             'label_academic_year' => 'Academic Year',
             'option_all_years' => 'All Academic Years',
             'btn_search' => 'Search',
@@ -258,7 +258,7 @@ function get_all_translations()
             'footer_copyright' => '© ' . $current_year . ' Hanoi University of Science and Technology',
 
             // Placeholder
-            'placeholder_student_code' => 'e.g. 2023',
+            'placeholder_student_code' => 'Enter student ID or name...',
 
             // Contact page
             'contact_title' => 'Contact & Feedback',

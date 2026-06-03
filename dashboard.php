@@ -704,6 +704,7 @@ require_once __DIR__ . '/includes/header.php';
         font-size: 0.9rem;
         transition: all 0.3s ease;
         white-space: nowrap;
+        border-radius: 0.5rem !important;
     }
 
     .search-btn:hover {
