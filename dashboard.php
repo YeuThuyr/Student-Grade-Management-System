@@ -330,6 +330,7 @@ require_once __DIR__ . '/includes/header.php';
                 <i class="fas fa-info-circle me-1"></i>
                 Có thể kết hợp tìm kiếm mã số và các bộ lọc. Biểu đồ và thẻ tóm tắt cũng sẽ tự động đồng bộ theo bộ lọc
                 này.
+            </div>
         </form>
 
         <?php if ($search_performed): ?>
