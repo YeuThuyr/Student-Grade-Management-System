@@ -34,6 +34,10 @@ if ($gradeId > 0) {
     if (!$grade) {
         die('Bản ghi điểm không tồn tại.');
     }
+    if (isGradeLocked($grade['academic_year'])) {
+        header('Location: ' . BASE_PATH . 'grades/list.php?error=locked');
+        exit();
+    }
     $values = [
         'student_id' => $grade['student_id'],
         'subject_id' => $grade['subject_id'],

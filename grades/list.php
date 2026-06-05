@@ -83,6 +83,14 @@ require_once __DIR__ . '/../includes/header.php';
         <?php endif; ?>
     </div>
 
+    <?php if (isset($_GET['error']) && $_GET['error'] === 'locked'): ?>
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span>Bản ghi điểm đã quá 1 năm và không thể chỉnh sửa.</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
     <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
         <form method="GET" class="row g-3 align-items-end">
             <?php if ($role === 'admin'): ?>
@@ -172,8 +180,12 @@ require_once __DIR__ . '/../includes/header.php';
                                 <td><?php echo e($grade['letter_grade']); ?></td>
                                 <?php if ($role === 'admin'): ?>
                                     <td>
-                                        <a href="<?php echo BASE_PATH; ?>grades/manage.php?id=<?php echo e($grade['id']); ?>"
-                                            class="btn btn-sm btn-outline-primary" data-i18n="common_edit">Sửa</a>
+                                        <?php if (isGradeLocked($grade['academic_year'])): ?>
+                                            <span class="badge bg-light text-muted border px-2 py-1 rounded" data-i18n="grade_locked">Đã khóa</span>
+                                        <?php else: ?>
+                                            <a href="<?php echo BASE_PATH; ?>grades/manage.php?id=<?php echo e($grade['id']); ?>"
+                                                class="btn btn-sm btn-outline-primary" data-i18n="common_edit">Sửa</a>
+                                        <?php endif; ?>
                                     </td>
                                 <?php endif; ?>
                             </tr>

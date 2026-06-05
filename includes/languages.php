@@ -169,6 +169,7 @@ function get_all_translations()
             'grade_th_student' => 'Sinh viên',
             'grade_no_results' => 'Không có bản ghi điểm phù hợp.',
             'grade_filter_prompt' => 'Vui lòng nhập hoặc chọn ít nhất một bộ lọc để xem điểm.',
+            'grade_locked' => 'Đã khóa',
 
             // Class list
             'class_list_title' => 'Quản lý lớp',
@@ -342,6 +343,7 @@ function get_all_translations()
             'grade_th_student' => 'Student',
             'grade_no_results' => 'No matching grade records.',
             'grade_filter_prompt' => 'Please enter or select at least one filter option to view grades.',
+            'grade_locked' => 'Locked',
 
             // Class list
             'class_list_title' => 'Class Management',
