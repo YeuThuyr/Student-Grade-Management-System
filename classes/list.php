@@ -51,35 +51,35 @@ require_once __DIR__ . '/../includes/header.php';
         </form>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4 bg-white">
+    <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th>#</th>
-                        <th data-i18n="class_th_code">Mã lớp</th>
-                        <th data-i18n="class_th_name">Tên lớp</th>
-                        <th data-i18n="subj_th_desc">Mô tả</th>
-                        <th data-i18n="common_actions">Hành động</th>
+                        <th class="px-4 py-3 text-muted fw-semibold">#</th>
+                        <th class="px-4 py-3 text-muted fw-semibold" data-i18n="class_th_code">Mã lớp</th>
+                        <th class="px-4 py-3 text-muted fw-semibold" data-i18n="class_th_name">Tên lớp</th>
+                        <th class="px-4 py-3 text-muted fw-semibold" data-i18n="subj_th_desc">Mô tả</th>
+                        <th class="px-4 py-3 text-muted fw-semibold text-end" data-i18n="common_actions">Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($classes)): ?>
                         <tr>
-                            <td colspan="5" class="text-center text-muted py-4" data-i18n="class_no_results">Không tìm thấy lớp học.</td>
+                            <td colspan="5" class="text-center text-muted py-5" data-i18n="class_no_results">Không tìm thấy lớp học.</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($classes as $index => $class): ?>
                             <tr>
-                                <td><?php echo e($index + 1); ?></td>
-                                <td><?php echo e($class['class_code']); ?></td>
-                                <td><?php echo e($class['class_name']); ?></td>
-                                <td><?php echo e($class['description']); ?></td>
-                                <td>
+                                <td class="px-4 py-3 text-muted"><?php echo e($index + 1); ?></td>
+                                <td class="px-4 py-3 fw-bold text-dark"><?php echo e($class['class_code']); ?></td>
+                                <td class="px-4 py-3 fw-semibold"><?php echo e($class['class_name']); ?></td>
+                                <td class="px-4 py-3 text-muted"><?php echo e($class['description']); ?></td>
+                                <td class="px-4 py-3 text-end">
                                     <a href="<?php echo BASE_PATH; ?>classes/edit.php?id=<?php echo e($class['id']); ?>"
-                                        class="btn btn-sm btn-outline-primary me-2" data-i18n="common_edit">Sửa</a>
+                                        class="btn btn-sm btn-outline-primary rounded-pill px-3 me-2" data-i18n="common_edit">Sửa</a>
                                     <a href="<?php echo BASE_PATH; ?>classes/delete.php?id=<?php echo e($class['id']); ?>"
-                                        class="btn btn-sm btn-outline-danger"
+                                        class="btn btn-sm btn-outline-danger rounded-pill px-3"
                                         onclick="return confirm('Bạn có chắc muốn xóa lớp này?');" data-i18n="common_delete">Xóa</a>
                                 </td>
                             </tr>
