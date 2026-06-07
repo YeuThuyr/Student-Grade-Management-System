@@ -4,6 +4,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 $isLoggedIn = isset($_SESSION['user_id']);
+$currentScript = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
+$isLoginPage = substr($currentScript, -strlen('/auth/login.php')) === '/auth/login.php';
 
 require_once __DIR__ . '/../config/env.php';
 ?>
@@ -125,7 +127,7 @@ require_once __DIR__ . '/../config/env.php';
 
                         <?php if ($isLoggedIn): ?>
                             <a href="<?php echo BASE_PATH; ?>auth/logout.php" class="btn login-btn px-4 text-nowrap" data-i18n="nav_logout"><?php echo __('nav_logout'); ?></a>
-                        <?php else: ?>
+                        <?php elseif (!$isLoginPage): ?>
                             <a href="<?php echo BASE_PATH; ?>auth/login.php" class="btn login-btn px-4 text-nowrap" data-i18n="nav_login"><?php echo __('nav_login'); ?></a>
                         <?php endif; ?>
                     </div>

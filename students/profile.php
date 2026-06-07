@@ -70,7 +70,6 @@ require_once __DIR__ . '/../includes/header.php';
             <p class="text-muted"><?php echo e($student['full_name']); ?> - <?php echo e($student['student_code']); ?>
             </p>
         </div>
-        <a href="<?php echo BASE_PATH; ?>auth/logout.php" class="btn btn-outline-danger">Đăng xuất</a>
     </div>
 
     <div class="row g-4">
