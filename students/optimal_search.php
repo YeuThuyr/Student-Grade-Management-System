@@ -46,6 +46,7 @@ if (isset($_POST['run_seeder'])) {
         // Wiping tables
         $pdo->exec("SET FOREIGN_KEY_CHECKS = 0;");
         $pdo->exec("TRUNCATE TABLE grades;");
+        $pdo->exec("TRUNCATE TABLE feedback_messages;");
         $pdo->exec("TRUNCATE TABLE users;");
         $pdo->exec("TRUNCATE TABLE students;");
         $pdo->exec("TRUNCATE TABLE subjects;");

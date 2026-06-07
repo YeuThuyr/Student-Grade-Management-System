@@ -5,8 +5,8 @@ define('IS_HOMEPAGE', false);
 define('SHOW_APP_SECTION', false);
 
 require_once __DIR__ . '/includes/helpers.php';
+require_once __DIR__ . '/config/database.php';
 
-$recipientEmail = 'thienstyle2k5@gmail.com';
 $errors = [];
 $success = false;
 
@@ -33,25 +33,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errors)) {
-        $mailSubject = '[Grade Management] ' . $subject;
-        $mailBody = "Họ và tên: {$name}\n";
-        $mailBody .= "Email: {$email}\n\n";
-        $mailBody .= "Nội dung phản hồi:\n{$message}\n";
+        try {
+            $stmt = $pdo->prepare(
+                'INSERT INTO feedback_messages (sender_name, sender_email, subject, message, sender_ip, user_agent)
+                 VALUES (?, ?, ?, ?, ?, ?)'
+            );
+            $success = $stmt->execute([
+                $name,
+                $email,
+                $subject,
+                $message,
+                $_SERVER['REMOTE_ADDR'] ?? null,
+                substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255)
+            ]);
 
-        $headers = [
-            'From: Grade Management <no-reply@localhost>',
-            'Reply-To: ' . $email,
-            'Content-Type: text/plain; charset=UTF-8',
-        ];
-
-        $success = mail($recipientEmail, $mailSubject, $mailBody, implode("\r\n", $headers));
-
-        if ($success) {
             $name = '';
             $email = '';
             $subject = '';
             $message = '';
-        } else {
+        } catch (PDOException $e) {
+            $success = false;
             $errors[] = __('contact_err_send');
         }
     }

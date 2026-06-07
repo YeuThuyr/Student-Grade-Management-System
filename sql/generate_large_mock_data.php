@@ -24,11 +24,13 @@ try {
     echo "[1/6] Cleaning up old tables...\n";
     $pdo->exec("SET FOREIGN_KEY_CHECKS = 0;");
     $pdo->exec("DELETE FROM grades;");
+    $pdo->exec("DELETE FROM feedback_messages;");
     $pdo->exec("DELETE FROM users;");
     $pdo->exec("DELETE FROM students;");
     $pdo->exec("DELETE FROM subjects;");
     $pdo->exec("DELETE FROM classes;");
     $pdo->exec("ALTER TABLE grades AUTO_INCREMENT = 1;");
+    $pdo->exec("ALTER TABLE feedback_messages AUTO_INCREMENT = 1;");
     $pdo->exec("ALTER TABLE users AUTO_INCREMENT = 1;");
     $pdo->exec("ALTER TABLE students AUTO_INCREMENT = 1;");
     $pdo->exec("ALTER TABLE subjects AUTO_INCREMENT = 1;");

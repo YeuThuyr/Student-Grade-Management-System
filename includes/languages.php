@@ -90,7 +90,7 @@ function get_all_translations()
             // Contact page
             'contact_title' => 'Liên hệ và phản hồi',
             'contact_desc' => 'Gửi ý kiến, câu hỏi hoặc báo lỗi về hệ thống quản lý điểm.',
-            'contact_success' => 'Phản hồi của bạn đã được gửi thành công.',
+            'contact_success' => 'Phản hồi của bạn đã được ghi nhận thành công.',
             'contact_name' => 'Họ và tên',
             'contact_email' => 'Email',
             'contact_subject' => 'Tiêu đề',
@@ -106,7 +106,7 @@ function get_all_translations()
             'contact_err_email' => 'Vui lòng nhập email hợp lệ.',
             'contact_err_subject' => 'Vui lòng nhập tiêu đề phản hồi.',
             'contact_err_message' => 'Vui lòng nhập nội dung phản hồi.',
-            'contact_err_send' => 'Không thể gửi phản hồi lúc này. Vui lòng thử lại sau hoặc gửi trực tiếp đến thienstyle2k5@gmail.com.',
+            'contact_err_send' => 'Không thể ghi nhận phản hồi lúc này. Vui lòng thử lại sau.',
 
             // Login page
             'login_title' => 'Đăng Nhập Hệ Thống',
@@ -264,7 +264,7 @@ function get_all_translations()
             // Contact page
             'contact_title' => 'Contact & Feedback',
             'contact_desc' => 'Send opinions, questions or report issues about the grade management system.',
-            'contact_success' => 'Your feedback has been sent successfully.',
+            'contact_success' => 'Your feedback has been submitted successfully.',
             'contact_name' => 'Full Name',
             'contact_email' => 'Email',
             'contact_subject' => 'Subject',
@@ -280,7 +280,7 @@ function get_all_translations()
             'contact_err_email' => 'Please enter a valid email address.',
             'contact_err_subject' => 'Please enter a message subject.',
             'contact_err_message' => 'Please enter your message.',
-            'contact_err_send' => 'Unable to send feedback at this time. Please try again later or email directly to thienstyle2k5@gmail.com.',
+            'contact_err_send' => 'Unable to submit feedback at this time. Please try again later.',
 
             // Login page
             'login_title' => 'System Login',

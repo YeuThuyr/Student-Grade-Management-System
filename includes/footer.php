@@ -1,5 +1,28 @@
 <?php
 // includes/footer.php
+$feedbackUnreadCount = 0;
+$feedbackNotifications = [];
+$showFeedbackNotifications = isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'admin';
+
+if ($showFeedbackNotifications) {
+    try {
+        if (!isset($pdo)) {
+            require_once __DIR__ . '/../config/database.php';
+        }
+
+        $feedbackUnreadCount = (int) $pdo->query('SELECT COUNT(*) FROM feedback_messages WHERE is_read = 0')->fetchColumn();
+        $feedbackStmt = $pdo->query(
+            'SELECT id, sender_name, sender_email, subject, created_at
+             FROM feedback_messages
+             WHERE is_read = 0
+             ORDER BY created_at DESC
+             LIMIT 20'
+        );
+        $feedbackNotifications = $feedbackStmt->fetchAll();
+    } catch (Throwable $e) {
+        $showFeedbackNotifications = false;
+    }
+}
 ?>
     <!-- 4. MOBILE APP SECTION & FOOTER SHARED -->
 
@@ -38,6 +61,55 @@
             <span class="text-white-50 fs-6" data-i18n="footer_copyright">&copy; <?php echo date('Y'); ?> Đại Học Bách Khoa Hà Nội</span>
         </div>
     </footer>
+
+    <?php if ($showFeedbackNotifications): ?>
+        <div class="feedback-notification-widget" id="feedbackNotificationWidget">
+            <div class="feedback-notification-panel" id="feedbackNotificationPanel" aria-hidden="true">
+                <div class="feedback-notification-header">
+                    <div>
+                        <div class="fw-bold text-dark">Feedback</div>
+                        <small class="text-muted"><?php echo $feedbackUnreadCount; ?> unread message<?php echo $feedbackUnreadCount === 1 ? '' : 's'; ?></small>
+                    </div>
+                </div>
+
+                <div class="feedback-notification-list">
+                    <?php if (empty($feedbackNotifications)): ?>
+                        <div class="feedback-notification-empty">No unread feedback.</div>
+                    <?php else: ?>
+                        <?php foreach ($feedbackNotifications as $feedback): ?>
+                            <a class="feedback-notification-item"
+                               href="<?php echo BASE_PATH; ?>feedback/view.php?id=<?php echo (int) $feedback['id']; ?>">
+                                <div class="feedback-notification-subject">
+                                    <?php echo htmlspecialchars($feedback['subject'], ENT_QUOTES, 'UTF-8'); ?>
+                                </div>
+                                <div class="feedback-notification-meta">
+                                    <?php echo htmlspecialchars($feedback['sender_name'], ENT_QUOTES, 'UTF-8'); ?>
+                                    &middot;
+                                    <?php echo htmlspecialchars($feedback['sender_email'], ENT_QUOTES, 'UTF-8'); ?>
+                                </div>
+                                <div class="feedback-notification-time">
+                                    <?php echo htmlspecialchars(date('d/m/Y H:i', strtotime($feedback['created_at'])), ENT_QUOTES, 'UTF-8'); ?>
+                                </div>
+                            </a>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <button class="feedback-notification-button"
+                    id="feedbackNotificationButton"
+                    type="button"
+                    aria-label="Feedback notifications"
+                    aria-expanded="false">
+                <i class="fas fa-bell"></i>
+                <?php if ($feedbackUnreadCount > 0): ?>
+                    <span class="feedback-notification-badge">
+                        <?php echo $feedbackUnreadCount > 99 ? '99+' : $feedbackUnreadCount; ?>
+                    </span>
+                <?php endif; ?>
+            </button>
+        </div>
+    <?php endif; ?>
 
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -177,6 +249,157 @@
                 });
             }
         });
+
+        (function() {
+            const widget = document.getElementById('feedbackNotificationWidget');
+            const button = document.getElementById('feedbackNotificationButton');
+            const panel = document.getElementById('feedbackNotificationPanel');
+
+            if (!widget || !button || !panel) return;
+
+            button.addEventListener('click', (event) => {
+                event.stopPropagation();
+                const isOpen = widget.classList.toggle('open');
+                button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                panel.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+            });
+
+            document.addEventListener('click', (event) => {
+                if (!widget.contains(event.target)) {
+                    widget.classList.remove('open');
+                    button.setAttribute('aria-expanded', 'false');
+                    panel.setAttribute('aria-hidden', 'true');
+                }
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    widget.classList.remove('open');
+                    button.setAttribute('aria-expanded', 'false');
+                    panel.setAttribute('aria-hidden', 'true');
+                }
+            });
+        })();
     </script>
+
+    <style>
+        .feedback-notification-widget {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 1100;
+        }
+
+        .feedback-notification-button {
+            position: relative;
+            width: 56px;
+            height: 56px;
+            border: none;
+            border-radius: 50%;
+            background: var(--hust-red, #dc3545);
+            color: #fff;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .feedback-notification-button:hover {
+            background: #b02a37;
+        }
+
+        .feedback-notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -6px;
+            min-width: 24px;
+            height: 24px;
+            padding: 0 6px;
+            border-radius: 999px;
+            background: #212529;
+            color: #fff;
+            border: 2px solid #fff;
+            font-size: 0.72rem;
+            font-weight: 700;
+            line-height: 20px;
+        }
+
+        .feedback-notification-panel {
+            position: absolute;
+            right: 0;
+            bottom: 68px;
+            width: min(360px, calc(100vw - 48px));
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(8px);
+            transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+        }
+
+        .feedback-notification-widget.open .feedback-notification-panel {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .feedback-notification-header {
+            padding: 14px 16px;
+            border-bottom: 1px solid #f1f3f5;
+            background: #f8f9fa;
+        }
+
+        .feedback-notification-list {
+            max-height: 360px;
+            overflow-y: auto;
+        }
+
+        .feedback-notification-item {
+            display: block;
+            padding: 12px 16px;
+            text-decoration: none;
+            border-bottom: 1px solid #f1f3f5;
+            background: #fff;
+        }
+
+        .feedback-notification-item:hover {
+            background: #fff5f5;
+        }
+
+        .feedback-notification-subject {
+            color: #212529;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .feedback-notification-meta,
+        .feedback-notification-time,
+        .feedback-notification-empty {
+            color: #6c757d;
+            font-size: 0.82rem;
+        }
+
+        .feedback-notification-meta {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 2px;
+        }
+
+        .feedback-notification-time {
+            margin-top: 4px;
+        }
+
+        .feedback-notification-empty {
+            padding: 24px 16px;
+            text-align: center;
+        }
+    </style>
 </body>
 </html>

@@ -104,11 +104,13 @@ require_once __DIR__ . '/../includes/header.php';
                                 </td>
                                 <td class="px-4 py-3 text-muted"><?php echo e($class['description']); ?></td>
                                 <td class="px-4 py-3 text-end">
-                                    <a href="<?php echo BASE_PATH; ?>classes/edit.php?id=<?php echo e($class['id']); ?>"
-                                        class="btn btn-sm btn-outline-primary rounded-pill px-3 me-2" data-i18n="common_edit">Sửa</a>
-                                    <a href="<?php echo BASE_PATH; ?>classes/delete.php?id=<?php echo e($class['id']); ?>"
-                                        class="btn btn-sm btn-outline-danger rounded-pill px-3"
-                                        onclick="return confirm('Bạn có chắc muốn xóa lớp này?');" data-i18n="common_delete">Xóa</a>
+                                    <div class="btn-group btn-group-sm class-action-group" role="group" aria-label="Class actions">
+                                        <a href="<?php echo BASE_PATH; ?>classes/edit.php?id=<?php echo e($class['id']); ?>"
+                                            class="btn btn-outline-primary flex-fill" data-i18n="common_edit">Sửa</a>
+                                        <a href="<?php echo BASE_PATH; ?>classes/delete.php?id=<?php echo e($class['id']); ?>"
+                                            class="btn btn-outline-danger flex-fill"
+                                            onclick="return confirm('Bạn có chắc muốn xóa lớp này?');" data-i18n="common_delete">Xóa</a>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -118,5 +120,15 @@ require_once __DIR__ . '/../includes/header.php';
         </div>
     </div>
 </div>
+
+<style>
+    .class-action-group {
+        width: 132px;
+    }
+
+    .class-action-group .btn {
+        min-width: 0;
+    }
+</style>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
