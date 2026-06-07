@@ -12,6 +12,19 @@ session_write_close();
 
 require_once __DIR__ . '/../config/database.php';
 
+$gradePointSql = "
+    CASE grades.letter_grade
+        WHEN 'A+' THEN 4.0
+        WHEN 'A' THEN 3.7
+        WHEN 'B+' THEN 3.5
+        WHEN 'B' THEN 3.0
+        WHEN 'C+' THEN 2.5
+        WHEN 'C' THEN 2.0
+        WHEN 'D' THEN 1.0
+        ELSE 0.0
+    END
+";
+
 // Filter params
 $f_search = isset($_GET['student_code']) ? trim($_GET['student_code']) : '';
 $f_year = isset($_GET['academic_year']) ? trim($_GET['academic_year']) : '';
@@ -52,16 +65,16 @@ $join_clause = "FROM grades g JOIN students s ON g.student_id = s.id";
 
 if ($f_gpa !== '') {
     $having_clause = "";
-    if ($f_gpa === 'excellent') $having_clause = " >= 8.0";
-    elseif ($f_gpa === 'good') $having_clause = " >= 6.5 AND avg_gpa < 8.0";
-    elseif ($f_gpa === 'average') $having_clause = " >= 5.0 AND avg_gpa < 6.5";
-    elseif ($f_gpa === 'weak') $having_clause = " < 5.0";
+    if ($f_gpa === 'excellent') $having_clause = " >= 3.6";
+    elseif ($f_gpa === 'good') $having_clause = " >= 3.0 AND avg_gpa < 3.6";
+    elseif ($f_gpa === 'average') $having_clause = " >= 2.0 AND avg_gpa < 3.0";
+    elseif ($f_gpa === 'weak') $having_clause = " < 2.0";
 
     $join_clause = "
         FROM grades g 
         JOIN students s ON g.student_id = s.id
         JOIN (
-            SELECT student_id, SUM(grades.average_score * sub.credit) / SUM(sub.credit) as avg_gpa 
+            SELECT student_id, SUM(($gradePointSql) * sub.credit) / SUM(sub.credit) as avg_gpa 
             FROM grades 
             JOIN subjects sub ON grades.subject_id = sub.id
             GROUP BY student_id 

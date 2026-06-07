@@ -76,13 +76,13 @@ function buildDashboardFilterContext($search_code, $f_year, $f_gender, $f_gpa, $
 
     $having_clause = "";
     if ($f_gpa === 'excellent')
-        $having_clause = " HAVING gpa >= 8.0";
+        $having_clause = " HAVING gpa >= 3.6";
     elseif ($f_gpa === 'good')
-        $having_clause = " HAVING gpa >= 6.5 AND gpa < 8.0";
+        $having_clause = " HAVING gpa >= 3.0 AND gpa < 3.6";
     elseif ($f_gpa === 'average')
-        $having_clause = " HAVING gpa >= 5.0 AND gpa < 6.5";
+        $having_clause = " HAVING gpa >= 2.0 AND gpa < 3.0";
     elseif ($f_gpa === 'weak')
-        $having_clause = " HAVING gpa < 5.0";
+        $having_clause = " HAVING gpa < 2.0";
 
     return [
         'where_sql' => implode(" AND ", $where_clauses),
@@ -99,6 +99,18 @@ $params = $filter_context['params'];
 $types = $filter_context['types'];
 $join_clause = $filter_context['join_clause'];
 $having_clause = $filter_context['having_clause'];
+$gradePointSql = "
+    CASE g.letter_grade
+        WHEN 'A+' THEN 4.0
+        WHEN 'A' THEN 3.7
+        WHEN 'B+' THEN 3.5
+        WHEN 'B' THEN 3.0
+        WHEN 'C+' THEN 2.5
+        WHEN 'C' THEN 2.0
+        WHEN 'D' THEN 1.0
+        ELSE 0.0
+    END
+";
 
 if ($has_specific_filters) {
     require_once __DIR__ . '/stats/summary.php'; // This provides $summary array
@@ -114,10 +126,11 @@ if ($has_specific_filters) {
     $top_students = [];
     $ts_where = $where_sql;
     $ts_query = "
-        SELECT s.student_code, s.full_name, c.class_name, ROUND(AVG(g.average_score), 2) as gpa
+        SELECT s.student_code, s.full_name, c.class_name, ROUND(SUM(($gradePointSql) * sub.credit) / SUM(sub.credit), 2) as gpa
         FROM students s
         LEFT JOIN classes c ON s.class_id = c.id
         JOIN grades g ON s.id = g.student_id
+        JOIN subjects sub ON g.subject_id = sub.id
         WHERE $ts_where
         GROUP BY s.id
         $having_clause
@@ -147,7 +160,7 @@ if ($has_specific_filters) {
     // Fetch Gender Breakdown
     $gender_breakdown = [];
     $gender_query = "
-        SELECT s.gender, COUNT(DISTINCT s.id) as student_count, ROUND(AVG(g.average_score), 2) as avg_gpa
+        SELECT s.gender, COUNT(DISTINCT s.id) as student_count, ROUND(AVG($gradePointSql), 2) as avg_gpa
         FROM students s
         JOIN grades g ON s.id = g.student_id
         WHERE $where_sql
@@ -173,9 +186,10 @@ $search_results = [];
 if ($search_performed) {
     $stmt = $pdo->prepare("
         SELECT s.id, s.student_code, s.full_name, s.date_of_birth, s.gender, s.email, s.phone,
-               ROUND(AVG(g.average_score), 2) as gpa
+               ROUND(SUM(($gradePointSql) * sub.credit) / SUM(sub.credit), 2) as gpa
         FROM students s
         $join_clause
+        LEFT JOIN subjects sub ON g.subject_id = sub.id
         WHERE $where_sql
         GROUP BY s.id
         $having_clause
@@ -308,15 +322,15 @@ require_once __DIR__ . '/includes/header.php';
                         onchange="document.getElementById('searchForm').submit()">
                         <option value="" data-i18n="dash_all_gpa">Tất cả mức điểm</option>
                         <option value="excellent" <?php if ($f_gpa === 'excellent')
-                            echo 'selected'; ?>>Xuất sắc (≥ 8.0)
+                            echo 'selected'; ?>>Xuất sắc (>= 3.6)
                         </option>
                         <option value="good" <?php if ($f_gpa === 'good')
-                            echo 'selected'; ?>>Khá (6.5 - 7.9)</option>
+                            echo 'selected'; ?>>Khá (3.0 - 3.59)</option>
                         <option value="average" <?php if ($f_gpa === 'average')
-                            echo 'selected'; ?>>Trung bình (5.0 - 6.4)
+                            echo 'selected'; ?>>Trung bình (2.0 - 2.99)
                         </option>
                         <option value="weak" <?php if ($f_gpa === 'weak')
-                            echo 'selected'; ?>>Yếu (< 5.0)</option>
+                            echo 'selected'; ?>>Yếu (< 2.0)</option>
                     </select>
                 </div>
             </div>
@@ -381,11 +395,11 @@ require_once __DIR__ . '/includes/header.php';
                                                 <?php
                                                 $gpa = (float) $student['gpa'];
                                                 $gpa_class = 'gpa-low';
-                                                if ($gpa >= 8.0)
+                                                if ($gpa >= 3.6)
                                                     $gpa_class = 'gpa-excellent';
-                                                elseif ($gpa >= 6.5)
+                                                elseif ($gpa >= 3.0)
                                                     $gpa_class = 'gpa-good';
-                                                elseif ($gpa >= 5.0)
+                                                elseif ($gpa >= 2.0)
                                                     $gpa_class = 'gpa-average';
                                                 ?>
                                                 <span class="gpa-badge <?php echo $gpa_class; ?>"><?php echo $student['gpa']; ?></span>

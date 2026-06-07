@@ -12,6 +12,19 @@ session_write_close();
 
 require_once __DIR__ . '/../config/database.php';
 
+$gradePointSql = "
+    CASE g.letter_grade
+        WHEN 'A+' THEN 4.0
+        WHEN 'A' THEN 3.7
+        WHEN 'B+' THEN 3.5
+        WHEN 'B' THEN 3.0
+        WHEN 'C+' THEN 2.5
+        WHEN 'C' THEN 2.0
+        WHEN 'D' THEN 1.0
+        ELSE 0.0
+    END
+";
+
 // Filter params
 $f_search = isset($_GET['student_code']) ? trim($_GET['student_code']) : '';
 $f_year = isset($_GET['academic_year']) ? trim($_GET['academic_year']) : '';
@@ -67,7 +80,7 @@ if ($f_year !== '') {
 
 // Subquery to get credit-weighted GPA per student
 $student_gpas_query = "
-    SELECT s.id, SUM(g.average_score * sub.credit) / SUM(sub.credit) as student_gpa
+    SELECT s.id, SUM(($gradePointSql) * sub.credit) / SUM(sub.credit) as student_gpa
     FROM students s
     JOIN grades g ON s.id = g.student_id
     JOIN subjects sub ON g.subject_id = sub.id
@@ -77,10 +90,10 @@ $student_gpas_query = "
 
 // If there's a GPA range filter, we apply it as a HAVING clause
 $having_clause = "";
-if ($f_gpa === 'excellent') $having_clause = " HAVING student_gpa >= 8.0";
-elseif ($f_gpa === 'good') $having_clause = " HAVING student_gpa >= 6.5 AND student_gpa < 8.0";
-elseif ($f_gpa === 'average') $having_clause = " HAVING student_gpa >= 5.0 AND student_gpa < 6.5";
-elseif ($f_gpa === 'weak') $having_clause = " HAVING student_gpa < 5.0";
+if ($f_gpa === 'excellent') $having_clause = " HAVING student_gpa >= 3.6";
+elseif ($f_gpa === 'good') $having_clause = " HAVING student_gpa >= 3.0 AND student_gpa < 3.6";
+elseif ($f_gpa === 'average') $having_clause = " HAVING student_gpa >= 2.0 AND student_gpa < 3.0";
+elseif ($f_gpa === 'weak') $having_clause = " HAVING student_gpa < 2.0";
 
 $student_gpas_query .= $having_clause;
 
@@ -97,7 +110,7 @@ foreach ($res as $row) {
     $gpa = (float)$row['student_gpa'];
     $total_gpa_sum += $gpa;
     $valid_students_count++;
-    if ($gpa >= 5.0) {
+    if ($gpa >= 1.0) {
         $pass_count++;
     } else {
         $fail_count++;
