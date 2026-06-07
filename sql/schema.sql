@@ -4,6 +4,9 @@ CREATE TABLE IF NOT EXISTS classes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     class_code VARCHAR(20) NOT NULL UNIQUE,
     class_name VARCHAR(100) NOT NULL,
+    major VARCHAR(100) DEFAULT NULL,
+    teacher VARCHAR(100) DEFAULT NULL,
+    status ENUM('Active', 'Inactive') NOT NULL DEFAULT 'Active',
     description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

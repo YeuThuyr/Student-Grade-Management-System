@@ -16,10 +16,10 @@ ALTER TABLE classes AUTO_INCREMENT = 1;
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- 2. Dữ liệu lớp học
-INSERT INTO classes (class_code, class_name, description) VALUES
-('CNTT-01', 'Công nghệ thông tin 1', 'Lớp chuyên ngành Công nghệ thông tin'),
-('CNTT-02', 'Công nghệ thông tin 2', 'Lớp chuyên ngành Công nghệ thông tin'),
-('KT-01', 'Kinh tế 1', 'Lớp chuyên ngành Kinh tế');
+INSERT INTO classes (class_code, class_name, major, teacher, status, description) VALUES
+('CNTT-01', 'Công nghệ thông tin 1', 'Công nghệ thông tin', 'TS. Nguyễn Minh Quang', 'Active', 'Lớp chuyên ngành Công nghệ thông tin'),
+('CNTT-02', 'Công nghệ thông tin 2', 'Công nghệ thông tin', 'ThS. Trần Thu Hà', 'Active', 'Lớp chuyên ngành Công nghệ thông tin'),
+('KT-01', 'Kinh tế 1', 'Kinh tế', 'PGS. Phạm Hoàng Nam', 'Active', 'Lớp chuyên ngành Kinh tế');
 
 -- 3. Dữ liệu sinh viên (Đa dạng các năm: 2021, 2022, 2023, 2024)
 INSERT INTO students (student_code, full_name, date_of_birth, gender, email, phone, address, class_id, is_active) VALUES

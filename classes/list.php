@@ -16,13 +16,23 @@ $search = trim($_GET['search'] ?? '');
 $where = ['1=1'];
 $params = [];
 if ($search !== '') {
-    $where[] = '(class_code LIKE ? OR class_name LIKE ?)';
+    $where[] = '(c.class_code LIKE ? OR c.class_name LIKE ? OR c.major LIKE ? OR c.teacher LIKE ? OR c.status LIKE ?)';
+    $params[] = "%$search%";
+    $params[] = "%$search%";
+    $params[] = "%$search%";
     $params[] = "%$search%";
     $params[] = "%$search%";
 }
 $whereSql = implode(' AND ', $where);
 
-$stmt = $pdo->prepare("SELECT * FROM classes WHERE $whereSql ORDER BY class_code ASC");
+$stmt = $pdo->prepare(
+    "SELECT c.*, COUNT(s.id) AS student_count
+     FROM classes c
+     LEFT JOIN students s ON s.class_id = c.id AND s.is_active = 1
+     WHERE $whereSql
+     GROUP BY c.id
+     ORDER BY c.class_code ASC"
+);
 $stmt->execute($params);
 $classes = $stmt->fetchAll();
 
@@ -43,7 +53,7 @@ require_once __DIR__ . '/../includes/header.php';
             <div class="col-md-8">
                 <label class="form-label" data-i18n="common_search">Tìm kiếm</label>
                 <input type="text" name="search" class="form-control" value="<?php echo e($search); ?>"
-                    placeholder="Mã lớp hoặc tên lớp" data-i18n-placeholder="class_search_ph">
+                    placeholder="Mã lớp, tên lớp, chuyên ngành hoặc giáo viên" data-i18n-placeholder="class_search_ph">
             </div>
             <div class="col-md-4">
                 <button class="btn btn-outline-primary w-100" data-i18n="common_search">Tìm kiếm</button>
@@ -57,16 +67,20 @@ require_once __DIR__ . '/../includes/header.php';
                 <thead class="table-light">
                     <tr>
                         <th class="px-4 py-3 text-muted fw-semibold">#</th>
-                        <th class="px-4 py-3 text-muted fw-semibold" data-i18n="class_th_code">Mã lớp</th>
-                        <th class="px-4 py-3 text-muted fw-semibold" data-i18n="class_th_name">Tên lớp</th>
-                        <th class="px-4 py-3 text-muted fw-semibold" data-i18n="subj_th_desc">Mô tả</th>
+                        <th class="px-4 py-3 text-muted fw-semibold">Class Code</th>
+                        <th class="px-4 py-3 text-muted fw-semibold">Class Name</th>
+                        <th class="px-4 py-3 text-muted fw-semibold">Major</th>
+                        <th class="px-4 py-3 text-muted fw-semibold text-center">Students</th>
+                        <th class="px-4 py-3 text-muted fw-semibold">Teacher</th>
+                        <th class="px-4 py-3 text-muted fw-semibold">Status</th>
+                        <th class="px-4 py-3 text-muted fw-semibold">Description</th>
                         <th class="px-4 py-3 text-muted fw-semibold text-end" data-i18n="common_actions">Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($classes)): ?>
                         <tr>
-                            <td colspan="5" class="text-center text-muted py-5" data-i18n="class_no_results">Không tìm thấy lớp học.</td>
+                            <td colspan="9" class="text-center text-muted py-5" data-i18n="class_no_results">Không tìm thấy lớp học.</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($classes as $index => $class): ?>
@@ -74,6 +88,20 @@ require_once __DIR__ . '/../includes/header.php';
                                 <td class="px-4 py-3 text-muted"><?php echo e($index + 1); ?></td>
                                 <td class="px-4 py-3 fw-bold text-dark"><?php echo e($class['class_code']); ?></td>
                                 <td class="px-4 py-3 fw-semibold"><?php echo e($class['class_name']); ?></td>
+                                <td class="px-4 py-3 text-muted"><?php echo e($class['major'] ?: '—'); ?></td>
+                                <td class="px-4 py-3 text-center">
+                                    <span class="badge bg-light text-dark border px-3 py-2 rounded-pill">
+                                        <?php echo e($class['student_count']); ?>
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-muted"><?php echo e($class['teacher'] ?: '—'); ?></td>
+                                <td class="px-4 py-3">
+                                    <?php if (($class['status'] ?? '') === 'Active'): ?>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill">Active</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-3 py-2 rounded-pill">Inactive</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td class="px-4 py-3 text-muted"><?php echo e($class['description']); ?></td>
                                 <td class="px-4 py-3 text-end">
                                     <a href="<?php echo BASE_PATH; ?>classes/edit.php?id=<?php echo e($class['id']); ?>"

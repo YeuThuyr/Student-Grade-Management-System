@@ -54,17 +54,17 @@ if (isset($_POST['run_seeder'])) {
 
         // Seed classes
         $classes = [
-            ['CNTT-01', 'Công nghệ thông tin 1', 'Lớp chuyên ngành Công nghệ thông tin K68'],
-            ['CNTT-02', 'Công nghệ thông tin 2', 'Lớp chuyên ngành Công nghệ thông tin K68'],
-            ['CNTT-03', 'Công nghệ thông tin 3', 'Lớp chuyên ngành Công nghệ thông tin K68'],
-            ['KHMT-01', 'Khoa học máy tính 1', 'Lớp chuyên ngành Khoa học máy tính K67'],
-            ['KHMT-02', 'Khoa học máy tính 2', 'Lớp chuyên ngành Khoa học máy tính K67'],
-            ['KT-01', 'Kinh tế đối ngoại 1', 'Lớp chuyên ngành Kinh tế đối ngoại'],
-            ['KT-02', 'Quản trị kinh doanh 2', 'Lớp chuyên ngành Quản trị kinh doanh'],
-            ['DTVT-01', 'Điện tử viễn thông 1', 'Lớp chuyên ngành Điện tử viễn thông'],
-            ['CĐT-01', 'Cơ điện tử 1', 'Lớp chuyên ngành Cơ điện tử K66'],
+            ['CNTT-01', 'Công nghệ thông tin 1', 'Công nghệ thông tin', 'TS. Nguyễn Minh Quang', 'Active', 'Lớp chuyên ngành Công nghệ thông tin K68'],
+            ['CNTT-02', 'Công nghệ thông tin 2', 'Công nghệ thông tin', 'ThS. Trần Thu Hà', 'Active', 'Lớp chuyên ngành Công nghệ thông tin K68'],
+            ['CNTT-03', 'Công nghệ thông tin 3', 'Công nghệ thông tin', 'TS. Lê Anh Dũng', 'Active', 'Lớp chuyên ngành Công nghệ thông tin K68'],
+            ['KHMT-01', 'Khoa học máy tính 1', 'Khoa học máy tính', 'PGS. Phạm Hoàng Nam', 'Active', 'Lớp chuyên ngành Khoa học máy tính K67'],
+            ['KHMT-02', 'Khoa học máy tính 2', 'Khoa học máy tính', 'TS. Đặng Minh Trang', 'Active', 'Lớp chuyên ngành Khoa học máy tính K67'],
+            ['KT-01', 'Kinh tế đối ngoại 1', 'Kinh tế đối ngoại', 'ThS. Vũ Thị Mai', 'Active', 'Lớp chuyên ngành Kinh tế đối ngoại'],
+            ['KT-02', 'Quản trị kinh doanh 2', 'Quản trị kinh doanh', 'TS. Hoàng Anh Tuấn', 'Active', 'Lớp chuyên ngành Quản trị kinh doanh'],
+            ['DTVT-01', 'Điện tử viễn thông 1', 'Điện tử viễn thông', 'PGS. Ngô Quang Huy', 'Active', 'Lớp chuyên ngành Điện tử viễn thông'],
+            ['CĐT-01', 'Cơ điện tử 1', 'Cơ điện tử', 'TS. Bùi Minh Khánh', 'Active', 'Lớp chuyên ngành Cơ điện tử K66'],
         ];
-        $classStmt = $pdo->prepare("INSERT INTO classes (class_code, class_name, description) VALUES (?, ?, ?)");
+        $classStmt = $pdo->prepare("INSERT INTO classes (class_code, class_name, major, teacher, status, description) VALUES (?, ?, ?, ?, ?, ?)");
         $classIds = [];
         foreach ($classes as $c) {
             $classStmt->execute($c);
