@@ -40,91 +40,12 @@ $f_class_id = isset($_GET['class_id']) ? trim($_GET['class_id']) : '';
 $has_specific_filters = ($f_year !== '' || $f_entry_year !== '' || $f_class_id !== '');
 $search_performed = ($search_code !== '' || $f_year !== '' || $f_gender !== '' || $f_gpa !== '' || $f_entry_year !== '' || $f_class_id !== '');
 
-if ($has_specific_filters) {
-    require_once __DIR__ . '/stats/summary.php'; // This provides $summary array
-    
-    // Fetch Top 5 Students
-    $top_students = [];
-    $ts_where = $where_sql;
-    $ts_query = "
-        SELECT s.student_code, s.full_name, c.class_name, ROUND(AVG(g.average_score), 2) as gpa
-        FROM students s
-        LEFT JOIN classes c ON s.class_id = c.id
-        JOIN grades g ON s.id = g.student_id
-        WHERE $ts_where
-        GROUP BY s.id
-        ORDER BY gpa DESC
-        LIMIT 5
-    ";
-    $stmt = $conn->prepare($ts_query);
-    if (!empty($params)) {
-        $stmt->bind_param($types, ...$params);
-    }
-    $stmt->execute();
-    $res = $stmt->get_result();
-    while ($row = $res->fetch_assoc()) {
-        $top_students[] = $row;
-    }
-    $stmt->close();
-
-    // Fetch Top 5 Subjects
-    $top_subjects = [];
-    $sub_query = "
-        SELECT sub.subject_code, sub.subject_name, ROUND(AVG(g.average_score), 2) as avg_score, COUNT(g.id) as enrollments
-        FROM grades g
-        JOIN subjects sub ON g.subject_id = sub.id
-        JOIN students s ON g.student_id = s.id
-        WHERE $where_sql
-        GROUP BY sub.id
-        ORDER BY avg_score DESC
-        LIMIT 5
-    ";
-    $stmt = $conn->prepare($sub_query);
-    if (!empty($params)) {
-        $stmt->bind_param($types, ...$params);
-    }
-    $stmt->execute();
-    $res = $stmt->get_result();
-    while ($row = $res->fetch_assoc()) {
-        $top_subjects[] = $row;
-    }
-    $stmt->close();
-
-    // Fetch Gender Breakdown
-    $gender_breakdown = [];
-    $gender_query = "
-        SELECT s.gender, COUNT(DISTINCT s.id) as student_count, ROUND(AVG(g.average_score), 2) as avg_gpa
-        FROM students s
-        JOIN grades g ON s.id = g.student_id
-        WHERE $where_sql
-        GROUP BY s.gender
-    ";
-    $stmt = $conn->prepare($gender_query);
-    if (!empty($params)) {
-        $stmt->bind_param($types, ...$params);
-    }
-    $stmt->execute();
-    $res = $stmt->get_result();
-    while ($row = $res->fetch_assoc()) {
-        $gender_breakdown[$row['gender']] = $row;
-    }
-    $stmt->close();
-} else {
-    $summary = [
-        'total_students' => 0,
-        'average_gpa' => 0,
-        'pass_rate' => 0,
-        'pass_count' => 0,
-        'fail_count' => 0
-    ];
-}
-
-$search_results = [];
-
-if ($search_performed) {
+function buildDashboardFilterContext($search_code, $f_year, $f_gender, $f_gpa, $f_entry_year, $f_class_id)
+{
     $where_clauses = ["1=1"];
     $params = [];
     $types = "";
+    $join_clause = "LEFT JOIN grades g ON s.id = g.student_id";
 
     if ($search_code !== '') {
         $where_clauses[] = "s.student_code LIKE ?";
@@ -143,19 +64,13 @@ if ($search_performed) {
     }
     if ($f_class_id !== '') {
         $where_clauses[] = "s.class_id = ?";
-        $params[] = $f_class_id;
+        $params[] = (int) $f_class_id;
         $types .= "i";
     }
-
-    $where_sql = implode(" AND ", $where_clauses);
-
-    $join_clause = "LEFT JOIN grades g ON s.id = g.student_id";
     if ($f_year !== '') {
         $where_clauses[] = "g.academic_year = ?";
         $params[] = $f_year;
         $types .= "s";
-        $where_sql = implode(" AND ", $where_clauses);
-        // Change to INNER JOIN to ensure we only get students who actually have grades in this year
         $join_clause = "JOIN grades g ON s.id = g.student_id";
     }
 
@@ -169,7 +84,94 @@ if ($search_performed) {
     elseif ($f_gpa === 'weak')
         $having_clause = " HAVING gpa < 5.0";
 
-    $stmt = $conn->prepare("
+    return [
+        'where_sql' => implode(" AND ", $where_clauses),
+        'params' => $params,
+        'types' => $types,
+        'join_clause' => $join_clause,
+        'having_clause' => $having_clause
+    ];
+}
+
+$filter_context = buildDashboardFilterContext($search_code, $f_year, $f_gender, $f_gpa, $f_entry_year, $f_class_id);
+$where_sql = $filter_context['where_sql'];
+$params = $filter_context['params'];
+$types = $filter_context['types'];
+$join_clause = $filter_context['join_clause'];
+$having_clause = $filter_context['having_clause'];
+
+if ($has_specific_filters) {
+    require_once __DIR__ . '/stats/summary.php'; // This provides $summary array
+
+    $filter_context = buildDashboardFilterContext($search_code, $f_year, $f_gender, $f_gpa, $f_entry_year, $f_class_id);
+    $where_sql = $filter_context['where_sql'];
+    $params = $filter_context['params'];
+    $types = $filter_context['types'];
+    $join_clause = $filter_context['join_clause'];
+    $having_clause = $filter_context['having_clause'];
+    
+    // Fetch Top 5 Students
+    $top_students = [];
+    $ts_where = $where_sql;
+    $ts_query = "
+        SELECT s.student_code, s.full_name, c.class_name, ROUND(AVG(g.average_score), 2) as gpa
+        FROM students s
+        LEFT JOIN classes c ON s.class_id = c.id
+        JOIN grades g ON s.id = g.student_id
+        WHERE $ts_where
+        GROUP BY s.id
+        $having_clause
+        ORDER BY gpa DESC
+        LIMIT 5
+    ";
+    $stmt = $pdo->prepare($ts_query);
+    $stmt->execute($params);
+    $top_students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Fetch Top 5 Subjects
+    $top_subjects = [];
+    $sub_query = "
+        SELECT sub.subject_code, sub.subject_name, ROUND(AVG(g.average_score), 2) as avg_score, COUNT(g.id) as enrollments
+        FROM grades g
+        JOIN subjects sub ON g.subject_id = sub.id
+        JOIN students s ON g.student_id = s.id
+        WHERE $where_sql
+        GROUP BY sub.id
+        ORDER BY avg_score DESC
+        LIMIT 5
+    ";
+    $stmt = $pdo->prepare($sub_query);
+    $stmt->execute($params);
+    $top_subjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Fetch Gender Breakdown
+    $gender_breakdown = [];
+    $gender_query = "
+        SELECT s.gender, COUNT(DISTINCT s.id) as student_count, ROUND(AVG(g.average_score), 2) as avg_gpa
+        FROM students s
+        JOIN grades g ON s.id = g.student_id
+        WHERE $where_sql
+        GROUP BY s.gender
+    ";
+    $stmt = $pdo->prepare($gender_query);
+    $stmt->execute($params);
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $gender_breakdown[$row['gender']] = $row;
+    }
+} else {
+    $summary = [
+        'total_students' => 0,
+        'average_gpa' => 0,
+        'pass_rate' => 0,
+        'pass_count' => 0,
+        'fail_count' => 0
+    ];
+}
+
+$search_results = [];
+
+if ($search_performed) {
+    $stmt = $pdo->prepare("
         SELECT s.id, s.student_code, s.full_name, s.date_of_birth, s.gender, s.email, s.phone,
                ROUND(AVG(g.average_score), 2) as gpa
         FROM students s
@@ -180,15 +182,8 @@ if ($search_performed) {
         ORDER BY s.student_code ASC
     ");
 
-    if (!empty($params)) {
-        $stmt->bind_param($types, ...$params);
-    }
-    $stmt->execute();
-    $result = $stmt->get_result();
-    while ($row = $result->fetch_assoc()) {
-        $search_results[] = $row;
-    }
-    $stmt->close();
+    $stmt->execute($params);
+    $search_results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 require_once __DIR__ . '/includes/header.php';
