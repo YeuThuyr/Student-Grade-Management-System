@@ -189,9 +189,21 @@ if ($searchCode !== '' && $totalStudents > 0) {
     
     // --- ALGORITHM 1: SQL INDEXED LOOKUP (B-TREE INDEX) ---
     // MySQL has a unique index on 'student_code'. This is O(log N) depth point lookup.
+    $gradePointSql = "
+        CASE g.letter_grade
+            WHEN 'A+' THEN 4.0
+            WHEN 'A' THEN 3.7
+            WHEN 'B+' THEN 3.5
+            WHEN 'B' THEN 3.0
+            WHEN 'C+' THEN 2.5
+            WHEN 'C' THEN 2.0
+            WHEN 'D' THEN 1.0
+            ELSE 0.0
+        END
+    ";
     $startSql = microtime(true);
     $stmt = $pdo->prepare("
-        SELECT s.*, c.class_name, ROUND(SUM(g.average_score * subj.credit) / SUM(subj.credit), 2) as gpa
+        SELECT s.*, c.class_name, ROUND(SUM(($gradePointSql) * subj.credit) / SUM(subj.credit), 2) as gpa
         FROM students s
         LEFT JOIN classes c ON s.class_id = c.id
         LEFT JOIN grades g ON s.id = g.student_id

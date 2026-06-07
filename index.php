@@ -74,11 +74,18 @@ if ($searched) {
             $studentGrades[$student['id']] = $grades;
 
             if (!empty($grades)) {
-                $total = 0;
+                $totalWeightedPoint = 0.0;
+                $totalCredits = 0;
                 foreach ($grades as $grade) {
-                    $total += (float) $grade['average_score'];
+                    $credit = (int) ($grade['credit'] ?? 0);
+                    if ($credit <= 0) {
+                        continue;
+                    }
+
+                    $totalWeightedPoint += gradePoint($grade['letter_grade']) * $credit;
+                    $totalCredits += $credit;
                 }
-                $studentGpas[$student['id']] = round($total / count($grades), 2);
+                $studentGpas[$student['id']] = $totalCredits > 0 ? round($totalWeightedPoint / $totalCredits, 2) : null;
             } else {
                 $studentGpas[$student['id']] = null;
             }
