@@ -123,14 +123,10 @@ try {
         'Hà',
         'Hùng',
         'Thảo',
-        'Huấn',
         'Huy',
         'Anh',
         'Long',
         'Hải',
-        'Tùng',
-        'Tiên',
-        'Sơn',
         'Tuấn',
         'Quân',
         'Dũng',
@@ -143,6 +139,11 @@ try {
         'Thịnh',
         'Khoa',
         'Kiên',
+        'Linh',
+        'Trang',
+        'Hương',
+        'Bảo',
+        'Khánh',
         'Hòa'
     ];
     $cities = ['Hà Nội', 'TP. Hồ Chí Minh', 'Đà Nẵng', 'Hải Phòng', 'Cần Thơ', 'Nghệ An', 'Thái Bình', 'Quảng Ninh', 'Bắc Ninh', 'Đồng Nai', 'Gia Lai', 'Lào Cai', 'Thừa Thiên Huế'];

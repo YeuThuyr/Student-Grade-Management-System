@@ -94,7 +94,7 @@ if (isset($_POST['run_seeder'])) {
         // Generate 5,000 Students
         $lastNames = ['Nguyễn', 'Trần', 'Lê', 'Phạm', 'Hoàng', 'Vũ', 'Đặng', 'Bùi', 'Đỗ', 'Hồ', 'Ngô', 'Phan', 'Dương', 'Lý', 'Vương', 'Trịnh'];
         $middleNames = ['Văn', 'Thị', 'Minh', 'Ngọc', 'Hữu', 'Đức', 'Khánh', 'Thu', 'Kim', 'Bảo', 'Xuân', 'Thành', 'Hoàng', 'Phương', 'Anh'];
-        $firstNames = ['An', 'Bình', 'Cường', 'Đức', 'Hà', 'Hùng', 'Thảo', 'Huấn', 'Huy', 'Anh', 'Long', 'Hải', 'Tùng', 'Tiên', 'Sơn', 'Tuấn', 'Quân', 'Dũng', 'Trâm', 'Vy', 'Mai', 'Nam'];
+        $firstNames = ['An', 'Bình', 'Cường', 'Đức', 'Hà', 'Hùng', 'Thảo', 'Huy', 'Anh', 'Long', 'Hải', 'Tuấn', 'Quân', 'Dũng', 'Trâm', 'Vy', 'Mai', 'Nam', 'Khánh', 'Khoa', 'Linh', 'Trang', 'Hương', 'Bảo'];
         $cities = ['Hà Nội', 'TP. Hồ Chí Minh', 'Đà Nẵng', 'Hải Phòng', 'Cần Thơ', 'Nghệ An', 'Thái Bình', 'Quảng Ninh', 'Bắc Ninh'];
 
         $studentCodeBase = 20200000;

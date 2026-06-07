@@ -4,6 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 $isLoggedIn = isset($_SESSION['user_id']);
+$role = $_SESSION['user']['role'] ?? '';
 $currentScript = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
 $isLoginPage = substr($currentScript, -strlen('/auth/login.php')) === '/auth/login.php';
 
@@ -71,7 +72,6 @@ require_once __DIR__ . '/../config/env.php';
                             <a class="nav-link nav-link-custom" href="<?php echo BASE_PATH; ?>index.php" data-i18n="nav_home"><?php echo __('nav_home'); ?></a>
                         </li>
                         <?php if ($isLoggedIn): ?>
-                            <?php $role = $_SESSION['user']['role'] ?? ''; ?>
                             <?php if ($role === 'admin'): ?>
                                 <li class="nav-item">
                                     <a class="nav-link nav-link-custom"
@@ -98,9 +98,11 @@ require_once __DIR__ . '/../config/env.php';
                                 </li>
                             <?php endif; ?>
                         <?php endif; ?>
-                        <li class="nav-item">
-                            <a class="nav-link nav-link-custom" href="<?php echo BASE_PATH; ?>contact.php" data-i18n="nav_contact"><?php echo __('nav_contact'); ?></a>
-                        </li>
+                        <?php if ($role !== 'admin'): ?>
+                            <li class="nav-item">
+                                <a class="nav-link nav-link-custom" href="<?php echo BASE_PATH; ?>contact.php" data-i18n="nav_contact"><?php echo __('nav_contact'); ?></a>
+                            </li>
+                        <?php endif; ?>
                     </ul>
 
                     <div class="d-flex align-items-center gap-3">

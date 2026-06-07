@@ -7,6 +7,11 @@ define('SHOW_APP_SECTION', false);
 require_once __DIR__ . '/includes/helpers.php';
 require_once __DIR__ . '/config/database.php';
 
+if (($_SESSION['user']['role'] ?? '') === 'admin') {
+    header('Location: ' . BASE_PATH . 'dashboard.php');
+    exit();
+}
+
 $errors = [];
 $success = false;
 
