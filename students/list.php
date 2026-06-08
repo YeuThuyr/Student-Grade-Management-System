@@ -11,6 +11,28 @@ require_once __DIR__ . '/../includes/helpers.php';
 handleAuth();
 checkRole(['admin']);
 
+$hasStudentClassesTable = false;
+try {
+    $pdo->exec(
+        "CREATE TABLE IF NOT EXISTS student_classes (
+            student_id INT NOT NULL,
+            class_id INT NOT NULL,
+            assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (student_id, class_id),
+            INDEX idx_student_classes_class_id (class_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+    );
+    $pdo->exec(
+        "INSERT IGNORE INTO student_classes (student_id, class_id)
+         SELECT id, class_id
+         FROM students
+         WHERE class_id IS NOT NULL"
+    );
+    $hasStudentClassesTable = true;
+} catch (PDOException $e) {
+    // Keep the page usable even if the hosting database user cannot create/alter tables.
+}
+
 $search = trim($_GET['search'] ?? '');
 $classFilter = trim($_GET['class_id'] ?? '');
 $page = max(1, intval($_GET['page'] ?? 1));
@@ -27,10 +49,25 @@ if ($search !== '') {
     $params[] = "%$search%";
 }
 if ($classFilter !== '') {
-    $where[] = 'EXISTS (SELECT 1 FROM student_classes scf WHERE scf.student_id = s.id AND scf.class_id = ?)';
+    $where[] = $hasStudentClassesTable
+        ? 'EXISTS (SELECT 1 FROM student_classes scf WHERE scf.student_id = s.id AND scf.class_id = ?)'
+        : 's.class_id = ?';
     $params[] = $classFilter;
 }
 $whereSql = implode(' AND ', $where);
+
+if ($hasStudentClassesTable) {
+    $classSelectSql = 'MAX(class_map.class_names) AS class_names';
+    $classJoinSql = "LEFT JOIN (
+        SELECT sc.student_id, GROUP_CONCAT(c.class_name ORDER BY c.class_name SEPARATOR ', ') AS class_names
+        FROM student_classes sc
+        JOIN classes c ON c.id = sc.class_id
+        GROUP BY sc.student_id
+     ) class_map ON class_map.student_id = s.id";
+} else {
+    $classSelectSql = 'MAX(c.class_name) AS class_names';
+    $classJoinSql = 'LEFT JOIN classes c ON s.class_id = c.id';
+}
 
 $countStmt = $pdo->prepare(
     "SELECT COUNT(*) FROM students s WHERE $whereSql"
@@ -40,7 +77,7 @@ $totalStudents = (int) $countStmt->fetchColumn();
 $totalPages = max(1, ceil($totalStudents / $perPage));
 
 $query =
-    "SELECT s.id, s.student_code, s.full_name, s.date_of_birth, s.gender, s.email, s.phone, s.created_at, MAX(class_map.class_names) AS class_names,
+    "SELECT s.id, s.student_code, s.full_name, s.date_of_birth, s.gender, s.email, s.phone, s.created_at, $classSelectSql,
             ROUND(SUM(
                 (CASE g.letter_grade
                     WHEN 'A+' THEN 4.0
@@ -51,17 +88,12 @@ $query =
                     WHEN 'C' THEN 2.0
                     WHEN 'D' THEN 1.0
                     ELSE 0.0
-                END) * subj.credit
-            ) / SUM(subj.credit), 2) AS gpa
+                END) * COALESCE(subj.credit, 0)
+            ) / NULLIF(SUM(COALESCE(subj.credit, 0)), 0), 2) AS gpa
      FROM students s
      LEFT JOIN grades g ON s.id = g.student_id
      LEFT JOIN subjects subj ON g.subject_id = subj.id
-     LEFT JOIN (
-        SELECT sc.student_id, GROUP_CONCAT(c.class_name ORDER BY c.class_name SEPARATOR ', ') AS class_names
-        FROM student_classes sc
-        JOIN classes c ON c.id = sc.class_id
-        GROUP BY sc.student_id
-     ) class_map ON class_map.student_id = s.id
+     $classJoinSql
      WHERE $whereSql
      GROUP BY s.id
      ORDER BY s.student_code ASC
