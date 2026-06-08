@@ -139,7 +139,6 @@ function get_all_translations()
             // Student list
             'stu_list_title' => 'Quản lý sinh viên',
             'stu_list_desc' => 'Thêm, sửa, tìm kiếm và hiển thị danh sách sinh viên.',
-            'stu_optimal_search' => 'Tìm kiếm Tối ưu & Benchmarks',
             'stu_add_btn' => 'Thêm sinh viên',
             'stu_all_classes' => 'Tất cả lớp',
             'stu_th_code' => 'Mã SV',
@@ -313,7 +312,6 @@ function get_all_translations()
             // Student list
             'stu_list_title' => 'Student Management',
             'stu_list_desc' => 'Add, edit, search and display student lists.',
-            'stu_optimal_search' => 'Optimal Search & Benchmarks',
             'stu_add_btn' => 'Add Student',
             'stu_all_classes' => 'All Classes',
             'stu_th_code' => 'Student ID',

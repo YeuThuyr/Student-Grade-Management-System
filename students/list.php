@@ -79,9 +79,6 @@ require_once __DIR__ . '/../includes/header.php';
             <p class="text-muted mb-0" data-i18n="stu_list_desc">Thêm, sửa, tìm kiếm và hiển thị danh sách sinh viên.</p>
         </div>
         <div>
-            <a href="<?php echo BASE_PATH; ?>students/optimal_search.php" class="btn btn-outline-primary me-2">
-                <i class="fa fa-bolt me-1"></i> <span data-i18n="stu_optimal_search">Tìm kiếm Tối ưu & Benchmarks</span>
-            </a>
             <a href="<?php echo BASE_PATH; ?>students/add.php" class="btn btn-hust" data-i18n="stu_add_btn">Thêm sinh viên</a>
         </div>
     </div>

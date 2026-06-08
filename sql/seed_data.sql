@@ -21,7 +21,12 @@ SET FOREIGN_KEY_CHECKS = 1;
 INSERT INTO classes (class_code, class_name, major, teacher, status, description) VALUES
 ('CNTT-01', 'Công nghệ thông tin 1', 'Công nghệ thông tin', 'TS. Nguyễn Minh Quang', 'Active', 'Lớp chuyên ngành Công nghệ thông tin'),
 ('CNTT-02', 'Công nghệ thông tin 2', 'Công nghệ thông tin', 'ThS. Trần Thu Hà', 'Active', 'Lớp chuyên ngành Công nghệ thông tin'),
-('KT-01', 'Kinh tế 1', 'Kinh tế', 'PGS. Phạm Hoàng Nam', 'Active', 'Lớp chuyên ngành Kinh tế');
+('KT-01', 'Kinh tế 1', 'Kinh tế', 'PGS. Phạm Hoàng Nam', 'Active', 'Lớp chuyên ngành Kinh tế'),
+('KHMT-01', 'Khoa học máy tính 1', 'Khoa học máy tính', 'TS. Lê Anh Dũng', 'Active', 'Lớp chuyên ngành Khoa học máy tính'),
+('DTVT-01', 'Điện tử viễn thông 1', 'Điện tử viễn thông', 'PGS. Ngô Quang Huy', 'Active', 'Lớp chuyên ngành Điện tử viễn thông'),
+('QTKD-01', 'Quản trị kinh doanh 1', 'Quản trị kinh doanh', 'ThS. Vũ Thị Mai', 'Active', 'Lớp chuyên ngành Quản trị kinh doanh'),
+('CDT-01', 'Cơ điện tử 1', 'Cơ điện tử', 'TS. Bùi Minh Khánh', 'Active', 'Lớp chuyên ngành Cơ điện tử'),
+('ATTT-01', 'An toàn thông tin 1', 'An toàn thông tin', 'TS. Trịnh Quốc Bảo', 'Active', 'Lớp chuyên ngành An toàn thông tin');
 
 -- 3. Dữ liệu sinh viên (Đa dạng các năm: 2021, 2022, 2023, 2024)
 INSERT INTO students (student_code, full_name, date_of_birth, gender, email, phone, address, class_id, is_active) VALUES
@@ -32,14 +37,14 @@ INSERT INTO students (student_code, full_name, date_of_birth, gender, email, pho
 ('20230025', 'Hoàng Ngọc Hà', '2005-11-22', 'Female', 'ha.hn@gmail.com', '0923234567', 'Cần Thơ', 1, 1),
 ('20220001', 'Vũ Việt Hùng', '2004-03-12', 'Male', 'hung.vv@gmail.com', '0934345678', 'Nghệ An', 3, 1),
 ('20220015', 'Đặng Thu Thảo', '2004-09-30', 'Female', 'thao.dt@gmail.com', '0945456789', 'Thái Bình', 3, 1),
-('20240001', 'Bùi Minh Khánh', '2006-02-14', 'Male', 'khanh.bm@gmail.com', '0956567890', 'Lào Cai', 2, 1),
-('20240456', 'Ngô Kiến Huy', '2006-07-08', 'Male', 'huy.nk@gmail.com', '0967678901', 'Gia Lai', 2, 1),
+('20240001', 'Bùi Minh Khánh', '2006-02-14', 'Male', 'khanh.bm@gmail.com', '0956567890', 'Lào Cai', 4, 1),
+('20240456', 'Ngô Kiến Huy', '2006-07-08', 'Male', 'huy.nk@gmail.com', '0967678901', 'Gia Lai', 5, 1),
 ('20210012', 'Nguyễn Lan Anh', '2003-10-15', 'Female', 'anh.nl@gmail.com', '0978789012', 'Quảng Ninh', 1, 1),
 ('20230105', 'Trần Bảo Long', '2005-04-18', 'Male', 'long.tb@gmail.com', '0989890123', 'Bắc Ninh', 1, 1),
-('20220500', 'Lý Minh Hải', '2004-06-06', 'Male', 'hai.lm@gmail.com', '0990901234', 'Tiền Giang', 3, 1),
-('20238888', 'Phan Đức Thành', '2005-07-05', 'Male', 'thanh.pd@gmail.com', '0911999888', 'Thái Bình', 2, 1),
-('20231234', 'Nguyễn Thu Hương', '2005-08-12', 'Female', 'huong.nt@gmail.com', '0922888777', 'TP. Hồ Chí Minh', 1, 1),
-('20235555', 'Đỗ Gia Bảo', '2005-02-28', 'Male', 'bao.dg@gmail.com', '0933777666', 'Đồng Nai', 2, 1);
+('20220500', 'Lý Minh Hải', '2004-06-06', 'Male', 'hai.lm@gmail.com', '0990901234', 'Tiền Giang', 6, 1),
+('20238888', 'Phan Đức Thành', '2005-07-05', 'Male', 'thanh.pd@gmail.com', '0911999888', 'Thái Bình', 7, 1),
+('20231234', 'Nguyễn Thu Hương', '2005-08-12', 'Female', 'huong.nt@gmail.com', '0922888777', 'TP. Hồ Chí Minh', 8, 1),
+('20235555', 'Đỗ Gia Bảo', '2005-02-28', 'Male', 'bao.dg@gmail.com', '0933777666', 'Đồng Nai', 4, 1);
 
 -- 4. Dữ liệu học phần
 INSERT INTO subjects (subject_code, subject_name, credit, description) VALUES
@@ -50,7 +55,15 @@ INSERT INTO subjects (subject_code, subject_name, credit, description) VALUES
 ('CS201', 'Cấu trúc dữ liệu và giải thuật', 4, 'Danh sách, cây, sắp xếp, tìm kiếm'),
 ('CS301', 'Hệ quản trị cơ sở dữ liệu', 3, 'SQL, thiết kế DB'),
 ('ENG101', 'Tiếng Anh chuyên ngành', 2, 'Tiếng Anh kỹ thuật'),
-('MKT101', 'Marketing cơ bản', 3, 'Nguyên lý Marketing');
+('MKT101', 'Marketing cơ bản', 3, 'Nguyên lý Marketing'),
+('MATH102', 'Giải tích II', 3, 'Tích phân bội, chuỗi số và phương trình vi phân'),
+('PHYS102', 'Vật lý đại cương II', 4, 'Điện từ học, quang học và vật lý hiện đại'),
+('CS302', 'Mạng máy tính', 3, 'Kiến trúc mạng, TCP/IP và bảo mật mạng'),
+('CS401', 'Trí tuệ nhân tạo', 4, 'Tìm kiếm, học máy cơ bản và mạng nơ-ron'),
+('STAT201', 'Xác suất thống kê', 3, 'Biến ngẫu nhiên, phân phối và kiểm định giả thuyết'),
+('ECON101', 'Kinh tế vi mô', 3, 'Cung cầu, thị trường và hành vi người tiêu dùng'),
+('EE101', 'Mạch điện cơ bản', 3, 'Định luật mạch điện và phân tích tín hiệu'),
+('ME101', 'Cơ học kỹ thuật', 3, 'Tĩnh học, động học và ứng dụng cơ khí');
 
 -- 5. Dữ liệu điểm số (trộn lẫn các mức điểm)
 -- Ghi chú: student_id sẽ tương ứng với thứ tự insert ở trên (1-15)
