@@ -19,13 +19,17 @@ $values = [
     'email' => '',
     'phone' => '',
     'address' => '',
-    'class_id' => ''
+    'class_ids' => []
 ];
 $errors = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     foreach ($values as $field => $value) {
-        $values[$field] = trim($_POST[$field] ?? '');
+        if ($field === 'class_ids') {
+            $values[$field] = array_values(array_unique(array_filter(array_map('intval', $_POST[$field] ?? []))));
+        } else {
+            $values[$field] = trim($_POST[$field] ?? '');
+        }
     }
 
     if ($values['student_code'] === '') {
@@ -39,6 +43,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($values['email'] !== '' && !filter_var($values['email'], FILTER_VALIDATE_EMAIL)) {
         $errors[] = 'Định dạng email không hợp lệ.';
     }
+    if (!empty($values['class_ids'])) {
+        $placeholders = implode(',', array_fill(0, count($values['class_ids']), '?'));
+        $classCheck = $pdo->prepare("SELECT COUNT(*) FROM classes WHERE id IN ($placeholders)");
+        $classCheck->execute($values['class_ids']);
+        if ((int) $classCheck->fetchColumn() !== count($values['class_ids'])) {
+            $errors[] = 'Một hoặc nhiều lớp đã chọn không hợp lệ.';
+        }
+    }
 
     if (empty($errors)) {
         $stmt = $pdo->prepare('SELECT COUNT(*) FROM students WHERE student_code = ?');
@@ -49,6 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errors)) {
+        $primaryClassId = $values['class_ids'][0] ?? null;
         $stmt = $pdo->prepare(
             'INSERT INTO students (student_code, full_name, date_of_birth, gender, email, phone, address, class_id, is_active)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)'
@@ -61,10 +74,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $values['email'] ?: null,
             $values['phone'] ?: null,
             $values['address'] ?: null,
-            $values['class_id'] ?: null,
+            $primaryClassId,
         ]);
 
         $studentId = $pdo->lastInsertId();
+        if (!empty($values['class_ids'])) {
+            $classInsert = $pdo->prepare('INSERT INTO student_classes (student_id, class_id) VALUES (?, ?)');
+            foreach ($values['class_ids'] as $classId) {
+                $classInsert->execute([$studentId, $classId]);
+            }
+        }
+
         $passwordHash = password_hash('password123', PASSWORD_DEFAULT);
         $userStmt = $pdo->prepare(
             'INSERT INTO users (username, password, role, student_id, is_active) VALUES (?, ?, "student", ?, 1)'
@@ -128,13 +148,13 @@ require_once __DIR__ . '/../includes/header.php';
                     </select>
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label">Lớp</label>
-                    <select name="class_id" class="form-select">
-                        <option value="">Chọn lớp</option>
+                    <label class="form-label">Lớp học</label>
+                    <select name="class_ids[]" class="form-select" multiple size="5">
                         <?php foreach ($classes as $class): ?>
-                            <option value="<?php echo e($class['id']); ?>" <?php echo $values['class_id'] == $class['id'] ? 'selected' : ''; ?>><?php echo e($class['class_name']); ?></option>
+                            <option value="<?php echo e($class['id']); ?>" <?php echo in_array((int) $class['id'], $values['class_ids'], true) ? 'selected' : ''; ?>><?php echo e($class['class_name']); ?></option>
                         <?php endforeach; ?>
                     </select>
+                    <div class="form-text">Giữ Ctrl để chọn nhiều lớp.</div>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Email</label>

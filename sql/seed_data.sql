@@ -6,6 +6,7 @@ DELETE FROM grades;
 DELETE FROM subjects;
 DELETE FROM feedback_messages;
 DELETE FROM users;
+DELETE FROM student_classes;
 DELETE FROM students;
 DELETE FROM classes;
 
@@ -45,6 +46,23 @@ INSERT INTO students (student_code, full_name, date_of_birth, gender, email, pho
 ('20238888', 'Phan Đức Thành', '2005-07-05', 'Male', 'thanh.pd@gmail.com', '0911999888', 'Thái Bình', 7, 1),
 ('20231234', 'Nguyễn Thu Hương', '2005-08-12', 'Female', 'huong.nt@gmail.com', '0922888777', 'TP. Hồ Chí Minh', 8, 1),
 ('20235555', 'Đỗ Gia Bảo', '2005-02-28', 'Male', 'bao.dg@gmail.com', '0933777666', 'Đồng Nai', 4, 1);
+
+INSERT INTO student_classes (student_id, class_id) VALUES
+(1, 1), (1, 4),
+(2, 1), (2, 8),
+(3, 2), (3, 4),
+(4, 2), (4, 5),
+(5, 1), (5, 6),
+(6, 3),
+(7, 3), (7, 6),
+(8, 4), (8, 8),
+(9, 5), (9, 7),
+(10, 1),
+(11, 1), (11, 4),
+(12, 6),
+(13, 7), (13, 2),
+(14, 8), (14, 1),
+(15, 4), (15, 2);
 
 -- 4. Dữ liệu học phần
 INSERT INTO subjects (subject_code, subject_name, credit, description) VALUES

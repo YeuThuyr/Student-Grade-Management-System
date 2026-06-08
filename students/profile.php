@@ -20,12 +20,22 @@ if (!$studentId) {
 // Release session lock early to prevent blocking concurrent connections
 session_write_close();
 
-$stmt = $pdo->prepare('SELECT id, student_code, full_name, date_of_birth, gender, email, phone, address, class_id FROM students WHERE id = ? AND is_active = 1');
+$stmt = $pdo->prepare('SELECT id, student_code, full_name, date_of_birth, gender, email, phone, address FROM students WHERE id = ? AND is_active = 1');
 $stmt->execute([$studentId]);
 $student = $stmt->fetch();
 if (!$student) {
     die('Sinh viên không tồn tại hoặc đã bị vô hiệu hóa.');
 }
+
+$classStmt = $pdo->prepare(
+    'SELECT c.class_name
+     FROM student_classes sc
+     JOIN classes c ON c.id = sc.class_id
+     WHERE sc.student_id = ?
+     ORDER BY c.class_name ASC'
+);
+$classStmt->execute([$studentId]);
+$studentClasses = $classStmt->fetchAll(PDO::FETCH_COLUMN);
 
 $gradesStmt = $pdo->prepare(
     'SELECT g.id, s.subject_code, s.subject_name, s.credit, g.midterm_score, g.final_score, g.other_score, g.average_score, g.letter_grade, g.semester, g.academic_year, g.updated_at
@@ -78,6 +88,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <h5 class="fw-bold mb-3">Thông tin cá nhân</h5>
                 <div class="mb-3"><strong>Mã sinh viên:</strong> <?php echo e($student['student_code']); ?></div>
                 <div class="mb-3"><strong>Họ và tên:</strong> <?php echo e($student['full_name']); ?></div>
+                <div class="mb-3"><strong>Lớp:</strong> <?php echo e(!empty($studentClasses) ? implode(', ', $studentClasses) : 'Chưa chỉ định'); ?></div>
                 <div class="mb-3"><strong>Ngày sinh:</strong> <?php echo e($student['date_of_birth']); ?></div>
                 <div class="mb-3"><strong>Giới tính:</strong> <?php echo e($student['gender']); ?></div>
                 <div class="mb-3"><strong>Email:</strong> <?php echo e($student['email']); ?></div>

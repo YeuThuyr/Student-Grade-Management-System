@@ -40,9 +40,14 @@ if ($searched) {
 
         $whereSql = implode(' AND ', $where);
         $studentStmt = $pdo->prepare(
-            "SELECT s.id, s.student_code, s.full_name, s.date_of_birth, s.gender, s.email, s.phone, c.class_name
+            "SELECT s.id, s.student_code, s.full_name, s.date_of_birth, s.gender, s.email, s.phone, class_map.class_names
              FROM students s
-             LEFT JOIN classes c ON s.class_id = c.id
+             LEFT JOIN (
+                SELECT sc.student_id, GROUP_CONCAT(c.class_name ORDER BY c.class_name SEPARATOR ', ') AS class_names
+                FROM student_classes sc
+                JOIN classes c ON c.id = sc.class_id
+                GROUP BY sc.student_id
+             ) class_map ON class_map.student_id = s.id
              WHERE $whereSql
              ORDER BY s.student_code ASC"
         );
@@ -170,8 +175,8 @@ require_once __DIR__ . '/includes/header.php';
                                         <h3 class="h5 fw-bold mb-2"><?php echo e($student['full_name']); ?></h3>
                                         <div class="text-muted">
                                             <?php echo e($student['student_code']); ?>
-                                            <?php if (!empty($student['class_name'])): ?>
-                                                <span class="mx-2">|</span><?php echo e($student['class_name']); ?>
+                                            <?php if (!empty($student['class_names'])): ?>
+                                                <span class="mx-2">|</span><?php echo e($student['class_names']); ?>
                                             <?php endif; ?>
                                         </div>
                                     </div>

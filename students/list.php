@@ -27,7 +27,7 @@ if ($search !== '') {
     $params[] = "%$search%";
 }
 if ($classFilter !== '') {
-    $where[] = 's.class_id = ?';
+    $where[] = 'EXISTS (SELECT 1 FROM student_classes scf WHERE scf.student_id = s.id AND scf.class_id = ?)';
     $params[] = $classFilter;
 }
 $whereSql = implode(' AND ', $where);
@@ -40,7 +40,7 @@ $totalStudents = (int) $countStmt->fetchColumn();
 $totalPages = max(1, ceil($totalStudents / $perPage));
 
 $query =
-    "SELECT s.id, s.student_code, s.full_name, s.date_of_birth, s.gender, s.email, s.phone, s.created_at, c.class_name,
+    "SELECT s.id, s.student_code, s.full_name, s.date_of_birth, s.gender, s.email, s.phone, s.created_at, MAX(class_map.class_names) AS class_names,
             ROUND(SUM(
                 (CASE g.letter_grade
                     WHEN 'A+' THEN 4.0
@@ -56,7 +56,12 @@ $query =
      FROM students s
      LEFT JOIN grades g ON s.id = g.student_id
      LEFT JOIN subjects subj ON g.subject_id = subj.id
-     LEFT JOIN classes c ON s.class_id = c.id
+     LEFT JOIN (
+        SELECT sc.student_id, GROUP_CONCAT(c.class_name ORDER BY c.class_name SEPARATOR ', ') AS class_names
+        FROM student_classes sc
+        JOIN classes c ON c.id = sc.class_id
+        GROUP BY sc.student_id
+     ) class_map ON class_map.student_id = s.id
      WHERE $whereSql
      GROUP BY s.id
      ORDER BY s.student_code ASC
@@ -133,7 +138,7 @@ require_once __DIR__ . '/../includes/header.php';
                                 <td class="px-4 py-3 fw-semibold"><?php echo e($student['full_name']); ?></td>
                                 <td class="px-4 py-3">
                                     <span class="badge bg-light text-dark border px-3 py-2 rounded-pill fw-medium">
-                                        <?php echo e($student['class_name'] ?? 'Chưa có'); ?>
+                                        <?php echo e($student['class_names'] ?? 'Chưa có'); ?>
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 text-muted"><?php echo e($student['email']); ?></td>

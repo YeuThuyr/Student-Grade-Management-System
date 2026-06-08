@@ -63,7 +63,7 @@ function buildDashboardFilterContext($search_code, $f_year, $f_gender, $f_gpa, $
         $types .= "s";
     }
     if ($f_class_id !== '') {
-        $where_clauses[] = "s.class_id = ?";
+        $where_clauses[] = "EXISTS (SELECT 1 FROM student_classes scf WHERE scf.student_id = s.id AND scf.class_id = ?)";
         $params[] = (int) $f_class_id;
         $types .= "i";
     }
@@ -126,9 +126,14 @@ if ($has_specific_filters) {
     $top_students = [];
     $ts_where = $where_sql;
     $ts_query = "
-        SELECT s.student_code, s.full_name, c.class_name, ROUND(SUM(($gradePointSql) * sub.credit) / SUM(sub.credit), 2) as gpa
+        SELECT s.student_code, s.full_name, MAX(class_map.class_names) AS class_names, ROUND(SUM(($gradePointSql) * sub.credit) / SUM(sub.credit), 2) as gpa
         FROM students s
-        LEFT JOIN classes c ON s.class_id = c.id
+        LEFT JOIN (
+            SELECT sc.student_id, GROUP_CONCAT(c.class_name ORDER BY c.class_name SEPARATOR ', ') AS class_names
+            FROM student_classes sc
+            JOIN classes c ON c.id = sc.class_id
+            GROUP BY sc.student_id
+        ) class_map ON class_map.student_id = s.id
         JOIN grades g ON s.id = g.student_id
         JOIN subjects sub ON g.subject_id = sub.id
         WHERE $ts_where
@@ -443,7 +448,7 @@ require_once __DIR__ . '/includes/header.php';
                                         <span class="badge bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; font-weight: 700;"><?php echo $idx + 1; ?></span>
                                         <div>
                                             <div class="fw-bold text-dark"><?php echo htmlspecialchars($student['full_name']); ?></div>
-                                            <small class="text-muted"><?php echo htmlspecialchars($student['student_code']); ?> | <?php echo htmlspecialchars($student['class_name'] ?? 'Chưa rõ'); ?></small>
+                                            <small class="text-muted"><?php echo htmlspecialchars($student['student_code']); ?> | <?php echo htmlspecialchars($student['class_names'] ?? 'Chưa rõ'); ?></small>
                                         </div>
                                     </div>
                                     <span class="badge bg-success-subtle text-success fs-6 px-3 py-2 fw-bold">GPA: <?php echo $student['gpa']; ?></span>

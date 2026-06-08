@@ -40,7 +40,17 @@ $semesterBreakdown = [];
 
 if ($targetStudentId) {
     // Fetch Student Info
-    $stmt = $pdo->prepare("SELECT s.*, c.class_name FROM students s LEFT JOIN classes c ON s.class_id = c.id WHERE s.id = ? AND s.is_active = 1");
+    $stmt = $pdo->prepare(
+        "SELECT s.*, class_map.class_names
+         FROM students s
+         LEFT JOIN (
+            SELECT sc.student_id, GROUP_CONCAT(c.class_name ORDER BY c.class_name SEPARATOR ', ') AS class_names
+            FROM student_classes sc
+            JOIN classes c ON c.id = sc.class_id
+            GROUP BY sc.student_id
+         ) class_map ON class_map.student_id = s.id
+         WHERE s.id = ? AND s.is_active = 1"
+    );
     $stmt->execute([$targetStudentId]);
     $studentInfo = $stmt->fetch();
 
@@ -211,7 +221,7 @@ require_once __DIR__ . '/../includes/header.php';
                     <h5 class="fw-bold mb-3"><i class="fa fa-id-card text-muted me-2"></i>Thông tin sinh viên</h5>
                     <div class="mb-2"><strong>Mã sinh viên:</strong> <?php echo e($studentInfo['student_code']); ?></div>
                     <div class="mb-2"><strong>Họ và tên:</strong> <?php echo e($studentInfo['full_name']); ?></div>
-                    <div class="mb-2"><strong>Lớp học:</strong> <?php echo e($studentInfo['class_name'] ?? 'Chưa chỉ định'); ?></div>
+                    <div class="mb-2"><strong>Lớp học:</strong> <?php echo e($studentInfo['class_names'] ?? 'Chưa chỉ định'); ?></div>
                     <div class="mb-2"><strong>Email:</strong> <?php echo e($studentInfo['email'] ?: 'Chưa cập nhật'); ?></div>
                 </div>
 

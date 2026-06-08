@@ -54,7 +54,7 @@ if ($f_entry_year !== '') {
     $params[] = $f_entry_year;
 }
 if ($f_class_id !== '') {
-    $where_clauses[] = "s.class_id = ?";
+    $where_clauses[] = "EXISTS (SELECT 1 FROM student_classes scf WHERE scf.student_id = s.id AND scf.class_id = ?)";
     $params[] = $f_class_id;
 }
 

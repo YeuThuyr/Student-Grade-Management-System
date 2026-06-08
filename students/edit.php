@@ -24,6 +24,13 @@ if (!$student) {
     die('Sinh viên không tồn tại.');
 }
 
+$studentClassStmt = $pdo->prepare('SELECT class_id FROM student_classes WHERE student_id = ?');
+$studentClassStmt->execute([$studentId]);
+$studentClassIds = array_map('intval', $studentClassStmt->fetchAll(PDO::FETCH_COLUMN));
+if (empty($studentClassIds) && !empty($student['class_id'])) {
+    $studentClassIds = [(int) $student['class_id']];
+}
+
 $values = [
     'student_code' => $student['student_code'],
     'full_name' => $student['full_name'],
@@ -32,13 +39,17 @@ $values = [
     'email' => $student['email'],
     'phone' => $student['phone'],
     'address' => $student['address'],
-    'class_id' => $student['class_id'] ?? ''
+    'class_ids' => $studentClassIds
 ];
 $errors = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     foreach ($values as $field => $value) {
-        $values[$field] = trim($_POST[$field] ?? '');
+        if ($field === 'class_ids') {
+            $values[$field] = array_values(array_unique(array_filter(array_map('intval', $_POST[$field] ?? []))));
+        } else {
+            $values[$field] = trim($_POST[$field] ?? '');
+        }
     }
 
     if ($values['student_code'] === '') {
@@ -52,6 +63,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($values['email'] !== '' && !filter_var($values['email'], FILTER_VALIDATE_EMAIL)) {
         $errors[] = 'Định dạng email không hợp lệ.';
     }
+    if (!empty($values['class_ids'])) {
+        $placeholders = implode(',', array_fill(0, count($values['class_ids']), '?'));
+        $classCheck = $pdo->prepare("SELECT COUNT(*) FROM classes WHERE id IN ($placeholders)");
+        $classCheck->execute($values['class_ids']);
+        if ((int) $classCheck->fetchColumn() !== count($values['class_ids'])) {
+            $errors[] = 'Một hoặc nhiều lớp đã chọn không hợp lệ.';
+        }
+    }
 
     if (empty($errors)) {
         $checkStmt = $pdo->prepare('SELECT COUNT(*) FROM students WHERE student_code = ? AND id <> ?');
@@ -62,6 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errors)) {
+        $primaryClassId = $values['class_ids'][0] ?? null;
         $updateStmt = $pdo->prepare(
             'UPDATE students SET student_code = ?, full_name = ?, date_of_birth = ?, gender = ?, email = ?, phone = ?, address = ?, class_id = ? WHERE id = ?'
         );
@@ -73,9 +93,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $values['email'] ?: null,
             $values['phone'] ?: null,
             $values['address'] ?: null,
-            $values['class_id'] ?: null,
+            $primaryClassId,
             $studentId,
         ]);
+
+        $deleteClasses = $pdo->prepare('DELETE FROM student_classes WHERE student_id = ?');
+        $deleteClasses->execute([$studentId]);
+        if (!empty($values['class_ids'])) {
+            $classInsert = $pdo->prepare('INSERT INTO student_classes (student_id, class_id) VALUES (?, ?)');
+            foreach ($values['class_ids'] as $classId) {
+                $classInsert->execute([$studentId, $classId]);
+            }
+        }
 
         $updateUser = $pdo->prepare('UPDATE users SET username = ? WHERE student_id = ?');
         $updateUser->execute([$values['student_code'], $studentId]);
@@ -136,13 +165,13 @@ require_once __DIR__ . '/../includes/header.php';
                     </select>
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label">Lớp</label>
-                    <select name="class_id" class="form-select">
-                        <option value="">Chọn lớp</option>
+                    <label class="form-label">Lớp học</label>
+                    <select name="class_ids[]" class="form-select" multiple size="5">
                         <?php foreach ($classes as $class): ?>
-                            <option value="<?php echo e($class['id']); ?>" <?php echo $values['class_id'] == $class['id'] ? 'selected' : ''; ?>><?php echo e($class['class_name']); ?></option>
+                            <option value="<?php echo e($class['id']); ?>" <?php echo in_array((int) $class['id'], $values['class_ids'], true) ? 'selected' : ''; ?>><?php echo e($class['class_name']); ?></option>
                         <?php endforeach; ?>
                     </select>
+                    <div class="form-text">Giữ Ctrl để chọn nhiều lớp.</div>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Email</label>

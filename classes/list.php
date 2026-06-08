@@ -28,7 +28,8 @@ $whereSql = implode(' AND ', $where);
 $stmt = $pdo->prepare(
     "SELECT c.*, COUNT(s.id) AS student_count
      FROM classes c
-     LEFT JOIN students s ON s.class_id = c.id AND s.is_active = 1
+     LEFT JOIN student_classes sc ON sc.class_id = c.id
+     LEFT JOIN students s ON s.id = sc.student_id AND s.is_active = 1
      WHERE $whereSql
      GROUP BY c.id
      ORDER BY c.class_code ASC"
