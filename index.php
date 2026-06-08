@@ -176,7 +176,18 @@ require_once __DIR__ . '/includes/header.php';
                                         <div class="text-muted">
                                             <?php echo e($student['student_code']); ?>
                                             <?php if (!empty($student['class_names'])): ?>
-                                                <span class="mx-2">|</span><?php echo e($student['class_names']); ?>
+                                                <?php $studentClasses = array_filter(array_map('trim', explode(',', $student['class_names']))); ?>
+                                                <span class="mx-2">|</span>
+                                                <span class="dropdown d-inline-block">
+                                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle py-0 px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        <?php echo count($studentClasses); ?> lớp
+                                                    </button>
+                                                    <span class="dropdown-menu">
+                                                        <?php foreach ($studentClasses as $className): ?>
+                                                            <span class="dropdown-item-text"><?php echo e($className); ?></span>
+                                                        <?php endforeach; ?>
+                                                    </span>
+                                                </span>
                                             <?php endif; ?>
                                         </div>
                                     </div>

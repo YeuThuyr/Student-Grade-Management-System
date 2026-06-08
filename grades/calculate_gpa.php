@@ -221,7 +221,24 @@ require_once __DIR__ . '/../includes/header.php';
                     <h5 class="fw-bold mb-3"><i class="fa fa-id-card text-muted me-2"></i>Thông tin sinh viên</h5>
                     <div class="mb-2"><strong>Mã sinh viên:</strong> <?php echo e($studentInfo['student_code']); ?></div>
                     <div class="mb-2"><strong>Họ và tên:</strong> <?php echo e($studentInfo['full_name']); ?></div>
-                    <div class="mb-2"><strong>Lớp học:</strong> <?php echo e($studentInfo['class_names'] ?? 'Chưa chỉ định'); ?></div>
+                    <div class="mb-2">
+                        <strong>Lớp học:</strong>
+                        <?php $studentClasses = array_filter(array_map('trim', explode(',', $studentInfo['class_names'] ?? ''))); ?>
+                        <?php if (empty($studentClasses)): ?>
+                            <span>Chưa chỉ định</span>
+                        <?php else: ?>
+                            <span class="dropdown d-inline-block">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle py-0 px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <?php echo count($studentClasses); ?> lớp
+                                </button>
+                                <span class="dropdown-menu">
+                                    <?php foreach ($studentClasses as $className): ?>
+                                        <span class="dropdown-item-text"><?php echo e($className); ?></span>
+                                    <?php endforeach; ?>
+                                </span>
+                            </span>
+                        <?php endif; ?>
+                    </div>
                     <div class="mb-2"><strong>Email:</strong> <?php echo e($studentInfo['email'] ?: 'Chưa cập nhật'); ?></div>
                 </div>
 

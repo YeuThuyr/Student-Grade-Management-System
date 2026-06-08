@@ -169,9 +169,21 @@ require_once __DIR__ . '/../includes/header.php';
                                 <td class="px-4 py-3 fw-bold text-dark"><?php echo e($student['student_code']); ?></td>
                                 <td class="px-4 py-3 fw-semibold"><?php echo e($student['full_name']); ?></td>
                                 <td class="px-4 py-3">
-                                    <span class="badge bg-light text-dark border px-3 py-2 rounded-pill fw-medium">
-                                        <?php echo e($student['class_names'] ?? 'Chưa có'); ?>
-                                    </span>
+                                    <?php $studentClasses = array_filter(array_map('trim', explode(',', $student['class_names'] ?? ''))); ?>
+                                    <?php if (empty($studentClasses)): ?>
+                                        <span class="badge bg-light text-dark border px-3 py-2 rounded-pill fw-medium">Chưa có</span>
+                                    <?php else: ?>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle class-dropdown-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <?php echo count($studentClasses); ?> lớp
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-start class-dropdown-menu">
+                                                <?php foreach ($studentClasses as $className): ?>
+                                                    <span class="dropdown-item-text"><?php echo e($className); ?></span>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
                                 </td>
                                 <td class="px-4 py-3 text-muted"><?php echo e($student['email']); ?></td>
                                 <td class="px-4 py-3">
@@ -267,5 +279,17 @@ require_once __DIR__ . '/../includes/header.php';
         </nav>
     <?php endif; ?>
 </div>
+
+<style>
+    .class-dropdown-btn {
+        min-width: 72px;
+    }
+
+    .class-dropdown-menu {
+        max-height: 220px;
+        overflow-y: auto;
+        min-width: 220px;
+    }
+</style>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

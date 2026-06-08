@@ -88,7 +88,23 @@ require_once __DIR__ . '/../includes/header.php';
                 <h5 class="fw-bold mb-3">Thông tin cá nhân</h5>
                 <div class="mb-3"><strong>Mã sinh viên:</strong> <?php echo e($student['student_code']); ?></div>
                 <div class="mb-3"><strong>Họ và tên:</strong> <?php echo e($student['full_name']); ?></div>
-                <div class="mb-3"><strong>Lớp:</strong> <?php echo e(!empty($studentClasses) ? implode(', ', $studentClasses) : 'Chưa chỉ định'); ?></div>
+                <div class="mb-3">
+                    <strong>Lớp:</strong>
+                    <?php if (empty($studentClasses)): ?>
+                        <span>Chưa chỉ định</span>
+                    <?php else: ?>
+                        <span class="dropdown d-inline-block">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle py-0 px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <?php echo count($studentClasses); ?> lớp
+                            </button>
+                            <span class="dropdown-menu">
+                                <?php foreach ($studentClasses as $className): ?>
+                                    <span class="dropdown-item-text"><?php echo e($className); ?></span>
+                                <?php endforeach; ?>
+                            </span>
+                        </span>
+                    <?php endif; ?>
+                </div>
                 <div class="mb-3"><strong>Ngày sinh:</strong> <?php echo e($student['date_of_birth']); ?></div>
                 <div class="mb-3"><strong>Giới tính:</strong> <?php echo e($student['gender']); ?></div>
                 <div class="mb-3"><strong>Email:</strong> <?php echo e($student['email']); ?></div>
